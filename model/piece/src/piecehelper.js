@@ -1,11 +1,11 @@
-var PieceHelper = {};
+let PieceHelper = {};
 PieceHelper.isEmpty = (gameState,{c: c, r: r} = box) => {
   return !gameState.board[r][c].trim();
 }
 PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
   const s = gameState.board[box.r][box.c];
-  var codeMatch = s.match(/([a-zA-z])(\d*)/);
-  var alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
+  let codeMatch = s.match(/([a-zA-z])(\d*)/);
+  let alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
   if (!alphacode) return false;
   if ((player == 0 && alphacode == alphacode.toLowerCase()) || (player == 1 && alphacode == alphacode.toUpperCase())) return true;
   return false;
@@ -29,8 +29,8 @@ PieceHelper.canGoAlongLineToDest = (gameState,srcA,srcB,dstA,dstC) => canGoAlong
 PieceHelper.canGoAlongRowToDest = (gameState,src,dst) => {
   if (src.r == dst.r) {
     const dir = dst.c > src.c ? 1 : -1;
-    var len = Math.abs(dst.c-src.c);
-    for (var i = src.c+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:src.r,c:i})) return false;
+    let len = Math.abs(dst.c-src.c);
+    for (let i = src.c+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:src.r,c:i})) return false;
     return true;
   }
   return false;
@@ -38,19 +38,19 @@ PieceHelper.canGoAlongRowToDest = (gameState,src,dst) => {
 PieceHelper.canGoAlongColToDest = (gameState,src,dst) => {
   if (src.c == dst.c) {
     const dir = dst.r > src.r ? 1 : -1;
-    var len = Math.abs(dst.r-src.r);
-    for (var i = src.r+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:i,c:src.c})) return false;
+    let len = Math.abs(dst.r-src.r);
+    for (let i = src.r+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:i,c:src.c})) return false;
     return true;
   }
   return false;
 }
 PieceHelper.canGoAlongDiagonalToDest = (gameState,src,dst) => { // natural functionality for bishop
   if (Math.abs((dst.r - src.r)/(dst.c - src.c)) != 1) return false;
-  var len = Math.abs(dst.c - src.c);
+  let len = Math.abs(dst.c - src.c);
   const rowDir = dst.r - src.r > 0 ? 1 : -1;
   const colDir = dst.c - src.c > 0 ? 1 : -1;
-  var i = src.r+rowDir;
-  var j = src.c+colDir;
+  let i = src.r+rowDir;
+  let j = src.c+colDir;
   for (; len-- > 1; i += rowDir, j += colDir) if (!PieceHelper.isEmpty(gameState,{r:i,c:j})) return false;
   return true;
 }

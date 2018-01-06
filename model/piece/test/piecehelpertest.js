@@ -2,7 +2,7 @@ const assert = require('assert');
 const PieceHelper = require('../src/piecehelper.js');
 
 function testBothPiecesBelongToSamePlayer1() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -23,7 +23,7 @@ function testBothPiecesBelongToSamePlayer1() {
   assert.equal(samePlayer,false);
 }
 function testBothPiecesBelongToSamePlayer2() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -44,7 +44,7 @@ function testBothPiecesBelongToSamePlayer2() {
   assert.equal(samePlayer,true);
 }
 function testBothPiecesBelongToSamePlayer3() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -65,7 +65,7 @@ function testBothPiecesBelongToSamePlayer3() {
   assert.equal(samePlayer,false);
 }
 function testBothPiecesBelongToSamePlayer4() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],

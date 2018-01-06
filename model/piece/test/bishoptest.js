@@ -2,7 +2,7 @@ const assert = require('assert');
 const Bishop = require('../src/bishop.js');
 
 function testBishopCannotGoThroughOwnPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -19,13 +19,13 @@ function testBishopCannotGoThroughOwnPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:0};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testBishopCanMoveWhenPathFree() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -42,13 +42,13 @@ function testBishopCanMoveWhenPathFree() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:0};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testBishopCanMoveWhenDestIsEnemy() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     [' ','P0','P0','P0','P0','P0','P0','P0'],
@@ -65,13 +65,13 @@ function testBishopCanMoveWhenDestIsEnemy() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:0};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testBishopCannotMoveWhenDestIsOwnTeam() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -88,13 +88,13 @@ function testBishopCannotMoveWhenDestIsOwnTeam() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:0};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testBishopCannotGoStraightForwardWithPieceInFront() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -111,13 +111,13 @@ function testBishopCannotGoStraightForwardWithPieceInFront() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:5};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testBishopCannotGoStraightForwardWithClearPath() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -134,8 +134,8 @@ function testBishopCannotGoStraightForwardWithClearPath() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:2};
   const dst = {r:5,c:5};
-  var isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Bishop.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 

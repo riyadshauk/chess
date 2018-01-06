@@ -2,7 +2,7 @@ const assert = require('assert');
 const Queen = require('../src/queen.js');
 
 function testQueenCannotGoThroughOwnPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -19,13 +19,13 @@ function testQueenCannotGoThroughOwnPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:3};
   const dst = {r:4,c:0};
-  var isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testQueenCanMoveDiagonalWhenPathNotObstructed() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -42,13 +42,13 @@ function testQueenCanMoveDiagonalWhenPathNotObstructed() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:3};
   const dst = {r:4,c:0};
-  var isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testQueenCanMoveAlongColWhenPathNotObstructed() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -65,13 +65,13 @@ function testQueenCanMoveAlongColWhenPathNotObstructed() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:3};
   const dst = {r:3,c:3};
-  var isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testQueenCanMoveAlongRowWhenPathNotObstructed() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -88,8 +88,8 @@ function testQueenCanMoveAlongRowWhenPathNotObstructed() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:3};
   const dst = {r:7,c:1};
-  var isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Queen.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 

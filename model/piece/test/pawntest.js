@@ -21,7 +21,7 @@ function testWhitePawnCanMove1ForwardWhenNumMovesIsZero() {
   const dst = {r:5,c:0};
   var isPossibleToMoveTo = Pawn.getPossibleMoves(gameState,src,0);
   var possible = isPossibleToMoveTo(dst);
-  assert.equal(possible,false);
+  assert.equal(possible,true);
 }
 
 function testWhitePawnCanMove2ForwardWhenNumMovesIsZero() {

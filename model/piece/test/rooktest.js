@@ -2,7 +2,7 @@ const assert = require('assert');
 const Rook = require('../src/rook.js');
 
 function testRookCanForwardWithNoObstruction() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -19,13 +19,13 @@ function testRookCanForwardWithNoObstruction() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:4,c:0};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testRookCannotGoForwardWithObstruction() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -42,13 +42,13 @@ function testRookCannotGoForwardWithObstruction() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:4,c:0};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testRookCanGoHorizontalWithoutObstruction() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -65,13 +65,13 @@ function testRookCanGoHorizontalWithoutObstruction() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:7,c:2};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testRookCannotGoHorizontalWithObstruction() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -88,13 +88,13 @@ function testRookCannotGoHorizontalWithObstruction() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:7,c:3};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testRookCanGoForwardAndCaptureEnemyPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -111,13 +111,13 @@ function testRookCanGoForwardAndCaptureEnemyPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:1,c:0};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 
 function testRookCannotGoForwardThrough2EnemyPieces() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -134,13 +134,13 @@ function testRookCannotGoForwardThrough2EnemyPieces() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:0,c:0};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 
 function testRookCannotGoForwardThrough1EnemyPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     [' ','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -157,8 +157,8 @@ function testRookCannotGoForwardThrough1EnemyPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:0};
   const dst = {r:0,c:0};
-  var isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Rook.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 

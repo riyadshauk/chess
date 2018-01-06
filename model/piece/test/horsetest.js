@@ -2,7 +2,7 @@ const assert = require('assert');
 const Horse = require('../src/horse.js');
 
 function testHorseCanMoveToValidPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -19,12 +19,12 @@ function testHorseCanMoveToValidPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:1};
   const dst = {r:5,c:2};
-  var isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,true);
 }
 function testHorseCannotMoveToInvalidBoxOnOwnPiece() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -41,12 +41,12 @@ function testHorseCannotMoveToInvalidBoxOnOwnPiece() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:1};
   const dst = {r:6,c:1};
-  var isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 function testHorseCannotMoveToInvalidEmptyBox() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -63,12 +63,12 @@ function testHorseCannotMoveToInvalidEmptyBox() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:1};
   const dst = {r:4,c:1};
-  var isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 function testHorseCannotFriendlyFireToValieBox() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -85,8 +85,8 @@ function testHorseCannotFriendlyFireToValieBox() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:1};
   const dst = {r:6,c:3};
-  var isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
-  var possible = isPossibleToMoveTo(dst);
+  let isPossibleToMoveTo = Horse.getPossibleMoves(gameState,src,0);
+  let possible = isPossibleToMoveTo(dst);
   assert.equal(possible,false);
 }
 

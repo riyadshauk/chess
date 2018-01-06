@@ -8,7 +8,7 @@ const PieceGameLogic = require('../src/piecegamelogic.js');
 // Should only test functionalities that are particularly inter-piece functionalities.
 
 function testKingCanCastleRookWhenNeitherHaveMoved() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -25,12 +25,12 @@ function testKingCanCastleRookWhenNeitherHaveMoved() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
-  var canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
+  let canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
   assert.equal(canCastle,true);
 }
 
 function testKingCannotCastleRookWhenOneHasMoved() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -47,12 +47,12 @@ function testKingCannotCastleRookWhenOneHasMoved() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
-  var canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
+  let canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
   assert.equal(canCastle,false);
 }
 
 function testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -69,12 +69,12 @@ function testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:4};
   const dst = {r:7,c:0};
-  var canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
+  let canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
   assert.equal(canCastle,true);
 }
 
 function testIsInCheck() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0',' ','P0','P0','P0','P0','P0','P0'],
@@ -90,12 +90,12 @@ function testIsInCheck() {
   gameState.playerBlack = 1;
   gameState.player = gameState.playerWhite;
   const src = {r:5,c:1};
-  var isInCheck = PieceGameLogic.isInCheck(gameState,src);
+  let isInCheck = PieceGameLogic.isInCheck(gameState,src);
   assert.equal(isInCheck,true);
 }
 
 function testIsNotInCheck() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0',' ','P0','P0','P0','P0','P0','P0'],
@@ -111,12 +111,12 @@ function testIsNotInCheck() {
   gameState.playerBlack = 1;
   gameState.player = gameState.playerWhite;
   const src = {r:4,c:1};
-  var isInCheck = PieceGameLogic.isInCheck(gameState,src);
+  let isInCheck = PieceGameLogic.isInCheck(gameState,src);
   assert.equal(isInCheck,false);
 }
 
 function testIsInCheckmate() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0',' ','P0','P0','P0','P0','P0','P0'],
@@ -132,12 +132,12 @@ function testIsInCheckmate() {
   gameState.playerBlack = 1;
   gameState.player = gameState.playerWhite;
   const src = {r:5,c:1};
-  var isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
+  let isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
   assert.equal(isInCheckmate,true);
 }
 
 function testIsNotInCheckmate() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -153,12 +153,12 @@ function testIsNotInCheckmate() {
   gameState.playerBlack = 1;
   gameState.player = gameState.playerWhite;
   const src = {r:5,c:1};
-  var isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
+  let isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
   assert.equal(isInCheckmate,true);
 }
 
 function testIsCapture() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -175,12 +175,12 @@ function testIsCapture() {
   gameState.player = gameState.playerBlack;
   const src = {r:5,c:1};
   const dst = {r:7,c:2};
-  var isCapture = PieceGameLogic.isACapture(gameState,src,dst);
+  let isCapture = PieceGameLogic.isACapture(gameState,src,dst);
   assert.equal(isCapture,true);
 }
 
 function testInvalidCaptureIsNotCapture() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -197,12 +197,12 @@ function testInvalidCaptureIsNotCapture() {
   gameState.player = gameState.playerWhite;
   const src = {r:5,c:1};
   const dst = {r:7,c:5};
-  var isCapture = PieceGameLogic.isACapture(gameState,src,dst);
+  let isCapture = PieceGameLogic.isACapture(gameState,src,dst);
   assert.equal(isCapture,false);
 }
 
 function testCastlingIsNotCapture() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -219,12 +219,12 @@ function testCastlingIsNotCapture() {
   gameState.player = gameState.playerWhite;
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
-  var isCapture = PieceGameLogic.isACapture(gameState,src,dst);
+  let isCapture = PieceGameLogic.isACapture(gameState,src,dst);
   assert.equal(isCapture,false);
 }
 
 function testValidNonCaptureIsNotCapture() {
-  var gameState = {};
+  let gameState = {};
   gameState.board = [
     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -241,12 +241,12 @@ function testValidNonCaptureIsNotCapture() {
   gameState.player = gameState.playerWhite;
   const src = {r:6,c:3};
   const dst = {r:4,c:3};
-  var isCapture = PieceGameLogic.isACapture(gameState,src,dst);
+  let isCapture = PieceGameLogic.isACapture(gameState,src,dst);
   assert.equal(isCapture,false);
 }
 
 // function testRandomDefensiveMove() {
-//   var gameState = {};
+//   let gameState = {};
 //   gameState.board = [
 //     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
 //     ['P0','P0','P0','P0','P0','P0','P0','P0'],
@@ -262,7 +262,7 @@ function testValidNonCaptureIsNotCapture() {
 //   gameState.playerBlack = 1;
 //   gameState.player = gameState.playerWhite;
 //   const src = {r:5,c:1};
-//   var isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
+//   let isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
 //   assert.equal(isInCheckmate,true);
 // }
 
