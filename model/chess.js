@@ -1,12 +1,12 @@
 var gameState = {};
 gameState.board = [
-  ['R','H','B','Q','K','B','H','R'], // upper case: black pieces
+  ['R','H','B','Q','K','B','H','R'], // lower case: black pieces
   ['P','P','P','P','P','P','P','P'],
   [' ',' ',' ',' ',' ',' ',' ',' '],
   [' ',' ',' ',' ',' ',' ',' ',' '],
   [' ',' ',' ',' ',' ',' ',' ',' '],
   [' ',' ',' ',' ',' ',' ',' ',' '],
-  ['p','p','p','p','p','p','p','p'], // lower case: white pieces
+  ['p','p','p','p','p','p','p','p'], // upper case: white pieces
   ['r','h','b','q','k','b','h','r'] ];
 gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
 gameState.board.colLength = 8;

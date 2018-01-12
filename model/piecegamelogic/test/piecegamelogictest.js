@@ -10,14 +10,14 @@ const PieceGameLogic = require('../src/piecegamelogic.js');
 function testKingCanCastleRookWhenNeitherHaveMoved() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0',' ',' ','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0',' ',' ','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -32,14 +32,14 @@ function testKingCanCastleRookWhenNeitherHaveMoved() {
 function testKingCannotCastleRookWhenOneHasMoved() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k1',' ',' ','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','k1',' ',' ','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -54,14 +54,14 @@ function testKingCannotCastleRookWhenOneHasMoved() {
 function testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0',' ',' ',' ','k0','b0','h0','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0',' ',' ',' ','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -76,14 +76,14 @@ function testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved() {
 function testIsInCheck() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0',' ','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','P0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','p0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -97,14 +97,14 @@ function testIsInCheck() {
 function testIsNotInCheck() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0',' ','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','P0',' ',' ',' ',' ',' ',' '],
+    [' ','p0',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -118,14 +118,14 @@ function testIsNotInCheck() {
 function testIsInCheckmate() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0',' ','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','P0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','p0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -139,14 +139,14 @@ function testIsInCheckmate() {
 function testIsNotInCheckmate() {
   let gameState = {};
   gameState.board = [
-    ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','H0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','h0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -160,14 +160,14 @@ function testIsNotInCheckmate() {
 function testIsCapture() {
   let gameState = {};
   gameState.board = [
-    ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','H0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','h0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -182,14 +182,14 @@ function testIsCapture() {
 function testInvalidCaptureIsNotCapture() {
   let gameState = {};
   gameState.board = [
-    ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','H0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','h0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -204,14 +204,14 @@ function testInvalidCaptureIsNotCapture() {
 function testCastlingIsNotCapture() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0',' ',' ','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0',' ',' ','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -226,14 +226,14 @@ function testCastlingIsNotCapture() {
 function testValidNonCaptureIsNotCapture() {
   let gameState = {};
   gameState.board = [
-    ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','H0',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','h0',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8;
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -248,14 +248,14 @@ function testValidNonCaptureIsNotCapture() {
 // function testRandomDefensiveMove() {
 //   let gameState = {};
 //   gameState.board = [
-//     ['R0',' ','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-//     ['P0','P0','P0','P0','P0','P0','P0','P0'],
+//     ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+//     ['p0','p0','p0','p0','p0','p0','p0','p0'],
 //     [' ',' ',' ',' ',' ',' ',' ',' '],
 //     [' ',' ',' ',' ',' ',' ',' ',' '],
 //     [' ',' ',' ',' ',' ',' ',' ',' '],
-//     [' ','H0',' ',' ',' ',' ',' ',' '],
-//     ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-//     ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+//     [' ','h0',' ',' ',' ',' ',' ',' '],
+//     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+//     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
 //   gameState.board.rowLength = 8;
 //   gameState.board.colLength = 8;
 //   gameState.playerWhite = 0;

@@ -4,14 +4,14 @@ const Rook = require('../src/rook.js');
 function testRookCanForwardWithNoObstruction() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -27,14 +27,14 @@ function testRookCanForwardWithNoObstruction() {
 function testRookCannotGoForwardWithObstruction() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -50,14 +50,14 @@ function testRookCannotGoForwardWithObstruction() {
 function testRookCanGoHorizontalWithoutObstruction() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0',' ',' ','q0','k0','b0','h0','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0',' ',' ','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -73,14 +73,14 @@ function testRookCanGoHorizontalWithoutObstruction() {
 function testRookCannotGoHorizontalWithObstruction() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    ['p0','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0',' ',' ','q0','k0','b0','h0','r0'] ];
+    ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0',' ',' ','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -96,14 +96,14 @@ function testRookCannotGoHorizontalWithObstruction() {
 function testRookCanGoForwardAndCaptureEnemyPiece() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -119,14 +119,14 @@ function testRookCanGoForwardAndCaptureEnemyPiece() {
 function testRookCannotGoForwardThrough2EnemyPieces() {
   let gameState = {};
   gameState.board = [
-    ['R0','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;
@@ -142,14 +142,14 @@ function testRookCannotGoForwardThrough2EnemyPieces() {
 function testRookCannotGoForwardThrough1EnemyPiece() {
   let gameState = {};
   gameState.board = [
-    [' ','H0','B0','Q0','K0','B0','H0','R0'], // upper case: black pieces
-    ['P0','P0','P0','P0','P0','P0','P0','P0'],
+    [' ','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
-    [' ','p0','p0','p0','p0','p0','p0','p0'], // lower case: white pieces
-    ['r0','h0','b0','q0','k0','b0','h0','r0'] ];
+    [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
   gameState.board.rowLength = 8; // yes, I am adding properties to the prototype of this particular Array.
   gameState.board.colLength = 8;
   gameState.playerWhite = 0;

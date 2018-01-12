@@ -7,7 +7,7 @@ PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
   let alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
   if (!alphacode) return false;
-  if ((player == 0 && alphacode == alphacode.toLowerCase()) || (player == 1 && alphacode == alphacode.toUpperCase())) return true;
+  if ((player == 0 && alphacode == alphacode.toUpperCase()) || (player == 1 && alphacode == alphacode.toLowerCase())) return true;
   return false;
 }
 PieceHelper.bothPiecesBelongToSamePlayer = (gameState,box1,box2) => {
@@ -20,7 +20,7 @@ PieceHelper.isPieceOfCurrentPlayer = (gameState,box) => {
   const checkParticularPlayer = (playerCase,{c: c, r: r} = box) =>
     (gameState.board[r][c] == playerCase.apply(gameState.board[r][c])) && !PieceHelper.isEmpty(gameState,box);
   return gameState.player == gameState.playerWhite ?
-    checkParticularPlayer(String.prototype.toLowerCase) : checkParticularPlayer(String.prototype.toUpperCase);
+    checkParticularPlayer(String.prototype.toUpperCase) : checkParticularPlayer(String.prototype.toLowerCase);
 }
 PieceHelper.isBoxOnBoard = (gameState,box) => box.r < gameState.board.rowLength && box.c < gameState.board.colLength;
 PieceHelper.isValidSourceAndDest = (gameState,src,dst) =>
