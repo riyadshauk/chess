@@ -1,0 +1,191 @@
+* {
+  margin: 0; 
+  padding: 0; 
+}
+
+table { 
+  border-collapse: collapse; 
+  border-spacing: 0; 
+}
+
+.chessboard { 
+  padding: 0px; 
+  margin: 0 auto; 
+  border: 2px solid #181818; 
+}
+
+.chessboard tr td { 
+  width: 45px; 
+  height: 45px; 
+}
+
+.chessboard tr:nth-child(2n) td:nth-child(2n+1) { 
+  /* https://coderbyte.com/tutorial/create-a-simple-chessboard-using-html-css-and-jquery */
+  background: #40e070;
+}
+
+.chessboard tr:nth-child(2n+1) td:nth-child(2n) { 
+  background: #40e070;
+}
+
+.chessboard tr:nth-child(2n) td:nth-child(2n) { 
+  background: #f5f106;
+}
+
+.chessboard tr:nth-child(2n+1) td:nth-child(2n+1) { 
+  background: #f5f106;
+}
+
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+ol, ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 45px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 45px;
+}
+
+.whitesquare {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 45px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 45px;
+}
+
+.blacksquare {
+  background: #009900;
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 45px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 45px;
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
+
+.whiteking {
+  background: url(./Chess_Pieces_Sprite.png) 0px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.whitequeen {
+  background: url(./Chess_Pieces_Sprite.png) -45px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.whitebishop {
+  background: url(./Chess_Pieces_Sprite.png) -90px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.whiteknight {
+  background: url(./Chess_Pieces_Sprite.png) -135px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.whiterook {
+  background: url(./Chess_Pieces_Sprite.png) -180px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.whitepawn {
+  background: url(./Chess_Pieces_Sprite.png) -225px 0px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackking {
+  background: url(./Chess_Pieces_Sprite.png) 0px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackqueen {
+  background: url(./Chess_Pieces_Sprite.png) -45px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackbishop {
+  background: url(./Chess_Pieces_Sprite.png) -90px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackknight {
+  background: url(./Chess_Pieces_Sprite.png) -135px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackrook {
+  background: url(./Chess_Pieces_Sprite.png) -180px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
+.blackpawn {
+  background: url(./Chess_Pieces_Sprite.png) -225px -45px;
+  display: inline-block;
+  height: 45px;
+  width: 45px;
+}
