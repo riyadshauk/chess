@@ -4,9 +4,18 @@ import Template from './template';
 import Store from './store';
 import View from './view';
 
+/**
+ * @type {!Store}
+ */
 const store = new Store('chess-game-vanilla-es6');
 
+/**
+ * @type {!Template}
+ */
 const template = new Template();
+/**
+ * @type {!View}
+ */
 const view = new View(template);
 
 /**
@@ -14,5 +23,5 @@ const view = new View(template);
  */
 const controller = new Controller(store, view);
 
-const init = () => controller.initializeBoard();
+const init = () => controller.showBoardAndBindBoxes();
 $on(window, 'load', init);

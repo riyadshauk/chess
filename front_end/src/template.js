@@ -4,46 +4,75 @@ import {escapeForHTML} from './helpers';
 
 export default class Template {
     /**
-     * Helper for Board
-     * 
-     * @param {string} title
-     * @returns {string} The title of the box, if it has a title, 'none' otherwise.
-     */
-    displayTitle(title){
-        return title ? '\"'+title+'\"' : '\"blank\"';
-    }
-
-    /**
      * Format the content of the board by:
      * 1) Creating each box in a table representation;
      * 2) Placing each piece in its corresponding box.
      * 
      * @param {Board} boxes Array containing boxes
      * @returns {!Element} Contents of the board (as a table)
-     * 
-     * @example
-     * view.show({
-     * title: "whiteking"
-     * })
      */
     Board(boxes) {
         let board = document.createElement('board');
-        let box = 0;
+        let boxPos = 0;
         for (let r = 0; r < 8; r++) {
             let tr = document.createElement('tr');
             for (let c = 0; c < 8; c++) {
                 let td = document.createElement('td');
-                td.setAttribute('data-pos', box);
-                if (boxes[r*8+c].piece) {
-                    let piece = document.createElement('div');
-                    piece.setAttribute('class', boxes[r*8+c].piece.title);
-                    td.appendChild(piece);
+                td.setAttribute('data-pos', boxPos);
+                const box = boxes[r*8+c];
+                const piece = box.piece;
+                if (piece) {
+                    let pieceDiv = document.createElement('div');
+                    pieceDiv.setAttribute('class', piece.title);
+                    td.appendChild(pieceDiv);
+                }
+                if (box.selected) {
+                    td.setAttribute('class', 'selected');
+                }
+                if (box.possibleDest) {
+                    td.setAttribute('class', 'possibleDest');
                 }
                 tr.appendChild(td);
-                box++;
+                boxPos++;
             }
             board.appendChild(tr);
         }
         return board;
+    }
+    /**
+     * @param {!string} type 
+     * @param {!Array<Piece>} captures 
+     * @returns {Element}
+     */
+    Captured(type, captures) {
+        let tr = document.createElement('tr');
+        for (let i = 0; i < captures.length; i++) {
+            const piece = captures[i];
+            if (piece.title.indexOf(type) == 0) {
+                let td = document.createElement('td');
+                let pieceDiv = document.createElement('div');
+                pieceDiv.setAttribute('class', piece.title);
+                if (piece.selectedCapture) {
+                    pieceDiv.setAttribute('class', piece.title + ' selectedCapture');
+                }
+                td.appendChild(pieceDiv);
+                tr.appendChild(td);
+            }
+        }
+        return tr;
+    }
+    /**
+     * @param {!Board} boxes
+     * @returns {Element} 
+     */
+    CapturedWhite(boxes) {
+        return this.Captured('white', boxes);
+    }
+    /**
+     * @param {!Board} boxes 
+     * @returns {Element}
+     */
+    CapturedBlack(boxes) {
+        return this.Captured('black', boxes);
     }
 }

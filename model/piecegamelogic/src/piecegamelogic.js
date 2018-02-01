@@ -1,60 +1,97 @@
-const PieceHelper = require('../../piece/src/piecehelper.js');
-const Pawn = require('../../piece/src/pawn.js');
-const Rook = require('../../piece/src/rook.js');
-const Horse = require('../../piece/src/horse.js');
-const Bishop = require('../../piece/src/bishop.js');
-const Queen = require('../../piece/src/queen.js');
-const King = require('../../piece/src/king.js');
+import {Box} from '../../box';
+import {GameState, initialGameState} from '../../gamestate';
+import {Piece, emptyPiece} from '../../piece/src/piece';
+import {PieceHelper} from '../../piece/src/piecehelper';
+import Pawn from '../../piece/src/pawn';
+import Rook from '../../piece/src/rook';
+import Knight from '../../piece/src/knight';
+import Bishop from '../../piece/src/bishop';
+import Queen from '../../piece/src/queen';
+import King from '../../piece/src/king';
 let PieceGameLogic = {};
+/**
+ * 
+ * @param {string} s 
+ * @returns {Piece}
+ */
 PieceGameLogic.getType = s => {
+  if (s.trim() === '') return emptyPiece;
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
   let numMoves = codeMatch && codeMatch.length > 2 ? codeMatch[2] : null;
-  if (!numMoves) return []; // no possible moves
   let alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
-  if (!alphacode) return null; // should cause failure
+  if (!numMoves || !alphacode) return emptyPiece;
   switch (alphacode.toLowerCase().trim()) {
     case 'p':
-      return Pawn;
+      return new Pawn;
     case 'r':
-      return Rook;
+      return new Rook;
     case 'h':
-      return Horse;
+      return new Knight;
     case 'b':
-      return Bishop;
+      return new Bishop;
     case 'q':
-      return Queen;
+      return new Queen;
     case 'k':
-      return King;
+      const king = new King(PieceGameLogic.kingCanCastleWithGivenRook);
+      return king;
     case '':
-      return '';
+      return emptyPiece;
     default:
-      return null; // should cause failure in some cases
+      return emptyPiece;
     }
 }
+/**
+ * 
+ * @param {string} s 
+ * @returns {(number)}
+ * @todo handle error case where code doesn't match in more meaningful way, better for testing.
+ */
 PieceGameLogic.getNumMoves = s => {
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
-  let numMoves = codeMatch && codeMatch.length > 2 ? codeMatch[2] : null;
-  return numMoves; // should cause failure iff numMoves is null
+  let numMoves = codeMatch && codeMatch.length > 2 && !isNaN(codeMatch[2]) ? Number(codeMatch[2]) : -1; // -1 should never happen, though.
+  return numMoves;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @returns {Array<Box>}
+ */
 PieceGameLogic.getPossibleMoves = (gameState,src) => {
   const constructMovesMatrix = (gameState,src,PieceType,numMoves) => {
     let validMoves = [];
-    const isPossibleToMoveTo = typeof PieceType.getPossibleMoves == 'function' ? PieceType.getPossibleMoves(gameState,src,numMoves) : null;
+    const isPossibleToMoveTo = typeof PieceType.getPossibleMoves == 'function' ? PieceType.getPossibleMoves(gameState,src,numMoves) : (dst)=>false;
     if (!isPossibleToMoveTo) return validMoves;
     for (let i = 0; i < gameState.board.length; i++)
       for (let j = 0; j < gameState.board[0].length; j++)
-        if (isPossibleToMoveTo({r:i,c:j})) validMoves.push({r:i,c:j});
+         if (isPossibleToMoveTo({r:i,c:j})) validMoves.push({r:i,c:j});
     return validMoves;
   }
   const s = gameState.board[src.r][src.c];
   const numMoves = PieceGameLogic.getNumMoves(s);
   const PieceType = PieceGameLogic.getType(s);
   if (PieceType && !isNaN(numMoves)) return constructMovesMatrix(gameState,src,PieceType,numMoves)
-  else if (PieceType == '') return []; // may be an empty piece, so don't wan't failure
-  else if (PieceType == null) return null; // should cause failure
+  return [];
 }
-
-// Game Logic for pieces
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src
+ * @returns {Function: boolean}
+ */
+PieceGameLogic.isPossibleToMoveTo = (gameState,src) => {
+  const s = gameState.board[src.r][src.c];
+  const numMoves = PieceGameLogic.getNumMoves(s);
+  const PieceType = PieceGameLogic.getType(s);
+  const isPossibleToMoveTo = PieceType.getPossibleMoves(gameState,src);
+  return isPossibleToMoveTo;
+}
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @returns {boolean}
+ */
 PieceGameLogic.isInCheck = (gameState,src) => {
   for (let i = 0; i < gameState.board.length; i++)
     for (let j = 0; j < gameState.board[0].length; j++)
@@ -66,6 +103,12 @@ PieceGameLogic.isInCheck = (gameState,src) => {
       }
   return false;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @returns {boolean}
+ */
 PieceGameLogic.isInCheckmate = (gameState,src) => {
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState,src);
   let pieceIsInCheck = PieceGameLogic.isInCheck(gameState,src);
@@ -77,15 +120,49 @@ PieceGameLogic.isInCheckmate = (gameState,src) => {
   }
   return false;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
 PieceGameLogic.kingCanCastleWithGivenRook = (gameState,src,dst) => {
   const s = gameState.board[src.r][src.c];
   const t = gameState.board[dst.r][dst.c];
-  if (PieceGameLogic.getType(s) != King || PieceGameLogic.getType(t) != Rook || PieceGameLogic.getNumMoves(s) != 0 || PieceGameLogic.getNumMoves(t) != 0) return false;
-  let dir = dst.c - src.c > 0 ? 1 : -1;
-  let len = Math.abs(dst.c-src.c);
-  for (let i = src.c+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:src.r,c:i})) return false;
-  return true;
+  if (PieceGameLogic.getType(s).name != (new King()).name || PieceGameLogic.getType(t).name != (new Rook).name || PieceGameLogic.getNumMoves(s) != 0 || PieceGameLogic.getNumMoves(t) != 0) return false;
+  if (PieceHelper.isPieceOfCurrentPlayer(gameState,src) && PieceHelper.isPieceOfCurrentPlayer(gameState,dst) && PieceHelper.isBoxOnBoard(gameState,dst) && src != dst) {
+    let dir = dst.c - src.c > 0 ? 1 : -1;
+    let len = Math.abs(dst.c-src.c);
+    for (let i = src.c+dir; len-- > 1; i += dir) if (!PieceHelper.isEmpty(gameState,{r:src.r,c:i})) return false;
+    return true;
+  }
 }
+/**
+ * Assumes PieceGameLogic.kingCanCastleWithGivenRook was called beforehand to verify this is a valid move.
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst
+ * @returns {GameState} Updated GameState with King's castle.
+ */
+PieceGameLogic.castleKingWithGivenRook = (gameState,src,dst) => {
+  let outDir = dst.c - src.c > 0 ? 1 : -1;
+  let shift = 0;
+  if (Math.abs(dst.c - src.c) == 3) shift = 2;
+  else if (Math.abs(dst.c - src.c) == 4) shift = 3;
+  gameState[src.r][src.c+outDir*shift] = Object.assign({},gameState[src.r][src.c]);
+  gameState[src.r][src.c] = ' ';
+  gameState[dst.r][dst.c-outDir*shift] = Object.assign({},gameState[dst.r][dst.c]);
+  gameState[dst.r][dst.c] = ' ';
+  return gameState;
+}
+
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {number} player 
+ * @returns {Set}
+ */
 PieceGameLogic.getSetOfAllPossibleMovesForPlayer = (gameState,player) => {
   let s = new Set();
   for (let i = 0; i < gameState.board.length; i++)
@@ -97,24 +174,34 @@ PieceGameLogic.getSetOfAllPossibleMovesForPlayer = (gameState,player) => {
       }
   return s;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @returns {Set}
+ * @todo not this simple, should prioritize kill-moves and moves that get the player out of harm (in next move only, for now)
+ */
 PieceGameLogic.randomDefensiveMove = (gameState) => {
-  // @todo, not this simple, should prioritize kill-moves and moves that get the player out of harm (in next move only, for now)
   const currentPlayer = gameState.player;
   const opponent = currentPlayer == 0 ? 1 : 0;
   const setOfOpponentMoves = PieceGameLogic.getSetOfAllPossibleMovesForPlayer(gameState,opponent);
   let randIdx = 0;
-  return setOfOpponentMoves[randIdx];
+  return setOfOpponentMoves;
 }
-
-// game-flow / state-related logic for pieces
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
 PieceGameLogic.isACapture = (gameState,src,dst) => {
   const s = gameState.board[src.r][src.c];
   const numMoves = PieceGameLogic.getNumMoves(s);
   const PieceType = PieceGameLogic.getType(s);
   if (typeof PieceType.getPossibleMoves == 'function' && !isNaN(numMoves)) {
     const isPossibleToMoveTo = PieceType.getPossibleMoves(gameState,src,numMoves);
-    if (isPossibleToMoveTo(dst) && !PieceHelper.bothPiecesBelongToSamePlayer(gameState,src,dst) && !PieceHelper.isEmpty(gameState,dst)) return true;
+    if (isPossibleToMoveTo(dst) && !PieceHelper.isPieceOfCurrentPlayer(gameState,dst) && !PieceHelper.isEmpty(gameState,dst)) return true;
   }
   return false;
 }
-module.exports = PieceGameLogic;
+export {PieceGameLogic};

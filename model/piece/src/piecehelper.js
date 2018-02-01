@@ -1,7 +1,38 @@
-let PieceHelper = {};
-PieceHelper.isEmpty = (gameState,{c: c, r: r} = box) => {
-  return !gameState.board[r][c].trim();
+import {emptyPieceHelper} from './piece';
+import {GameState} from '../../gamestate';
+import {Box} from '../../box';
+let PieceHelper = emptyPieceHelper;
+/**
+ * @param {GameState} gameState
+ * @param {Box} box
+ * @returns {number}
+ * @todo handle error case where code doesn't match in more meaningful way, better for testing.
+ */
+PieceHelper.getNumMoves = (gameState,box) => {
+  const {c: c, r: r} = box;
+  const s = gameState.board[r][c];
+  let codeMatch = s.match(/([a-zA-z])(\d*)/);
+  let numMoves = codeMatch && codeMatch.length > 2 && !isNaN(codeMatch[2]) ? Number(codeMatch[2]) : -1; // -1 should never happen, though.
+  return numMoves;
 }
+/**
+ * 
+ * @param {GameState} gameState
+ * @param {Box} box
+ * @returns {boolean}
+ * @todo Parameter destructuring not yet supported by Google Closure compiler. Check for updates: https://github.com/google/closure-compiler/issues/1781 and revise if updated.
+ */
+PieceHelper.isEmpty = (gameState,box) => {
+  const {c: c, r: r} = box;
+  return gameState.board[r][c].trim() === '';
+}
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {number} player 
+ * @param {Box} box
+ * @returns {boolean}
+ */
 PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
   const s = gameState.board[box.r][box.c];
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
@@ -10,22 +41,40 @@ PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
   if ((player == 0 && alphacode == alphacode.toUpperCase()) || (player == 1 && alphacode == alphacode.toLowerCase())) return true;
   return false;
 }
-PieceHelper.bothPiecesBelongToSamePlayer = (gameState,box1,box2) => {
-  if (gameState.board[box1.r][box1.c].trim() == '' || gameState.board[box2.r][box2.c].trim() == '') return false; // strictly defined this way.
-  const box1IsLowerCase = gameState.board[box1.r][box1.c] == gameState.board[box1.r][box1.c].toLowerCase() ? true : false;
-  const box2IsLowerCase = gameState.board[box2.r][box2.c] == gameState.board[box2.r][box2.c].toLowerCase() ? true : false;
-  return box1IsLowerCase == box2IsLowerCase;
-}
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} box 
+ * @returns {boolean}
+ */
 PieceHelper.isPieceOfCurrentPlayer = (gameState,box) => {
   const checkParticularPlayer = (playerCase,{c: c, r: r} = box) =>
     (gameState.board[r][c] == playerCase.apply(gameState.board[r][c])) && !PieceHelper.isEmpty(gameState,box);
   return gameState.player == gameState.playerWhite ?
     checkParticularPlayer(String.prototype.toUpperCase) : checkParticularPlayer(String.prototype.toLowerCase);
 }
-PieceHelper.isBoxOnBoard = (gameState,box) => box.r < gameState.board.rowLength && box.c < gameState.board.colLength;
-PieceHelper.isValidSourceAndDest = (gameState,src,dst) =>
-  PieceHelper.isPieceOfCurrentPlayer(gameState,src) && PieceHelper.isBoxOnBoard(gameState,dst) && !PieceHelper.bothPiecesBelongToSamePlayer(gameState,src,dst) && src != dst;
-PieceHelper.canGoAlongLineToDest = (gameState,srcA,srcB,dstA,dstC) => canGoAlongColToDest(gameState,src,dst) || canGoAlongRowToDest(gameState,src,dst);
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} box 
+ * @returns {boolean}
+ */
+PieceHelper.isBoxOnBoard = (gameState,box) => box.r < gameState.numRows && box.r >= 0 && box.c >= 0 && box.c < gameState.numCols;
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
+PieceHelper.isValidSourceAndDest = (gameState,src,dst) => PieceHelper.isPieceOfCurrentPlayer(gameState,src) && !PieceHelper.isPieceOfCurrentPlayer(gameState,dst) && PieceHelper.isBoxOnBoard(gameState,dst) && src != dst;
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
 PieceHelper.canGoAlongRowToDest = (gameState,src,dst) => {
   if (src.r == dst.r) {
     const dir = dst.c > src.c ? 1 : -1;
@@ -35,6 +84,13 @@ PieceHelper.canGoAlongRowToDest = (gameState,src,dst) => {
   }
   return false;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
 PieceHelper.canGoAlongColToDest = (gameState,src,dst) => {
   if (src.c == dst.c) {
     const dir = dst.r > src.r ? 1 : -1;
@@ -44,6 +100,21 @@ PieceHelper.canGoAlongColToDest = (gameState,src,dst) => {
   }
   return false;
 }
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src
+ * @param {Box} dst
+ * @returns {boolean}
+ */
+PieceHelper.canGoAlongLineToDest = (gameState,src,dst) => PieceHelper.canGoAlongColToDest(gameState,src,dst) || PieceHelper.canGoAlongRowToDest(gameState,src,dst);
+/**
+ * 
+ * @param {GameState} gameState 
+ * @param {Box} src 
+ * @param {Box} dst 
+ * @returns {boolean}
+ */
 PieceHelper.canGoAlongDiagonalToDest = (gameState,src,dst) => { // natural functionality for bishop
   if (Math.abs((dst.r - src.r)/(dst.c - src.c)) != 1) return false;
   let len = Math.abs(dst.c - src.c);
@@ -54,4 +125,4 @@ PieceHelper.canGoAlongDiagonalToDest = (gameState,src,dst) => { // natural funct
   for (; len-- > 1; i += rowDir, j += colDir) if (!PieceHelper.isEmpty(gameState,{r:i,c:j})) return false;
   return true;
 }
-module.exports = PieceHelper;
+export {PieceHelper};

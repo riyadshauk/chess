@@ -1,6 +1,6 @@
 import Store from './store';
 import View from './view';
-import {Board, Box, emptyBox, emptyPiece, Location} from './box';
+import {Board, Box, emptyBox, initializePiece, Location} from './box';
 
 /**
  * Deserialize the HTML data into a JS object.
@@ -11,17 +11,20 @@ import {Board, Box, emptyBox, emptyPiece, Location} from './box';
 const deserializeBoxContents = box => {
     let ret = emptyBox(Number(box.getAttribute('data-pos')));
     if (box.querySelector('div')) {
-        ret.piece = emptyPiece;
-        ret.piece.title = box.querySelector('div').getAttribute('class')
+        ret.piece = initializePiece(box.querySelector('div').getAttribute('class'));
     }
     return ret;
 }
+
+const deserializeCapturedPiece = pieceElem => initializePiece(pieceElem.firstChild.getAttribute('class'));
 
 /**
  * @param {Box} box
  * @returns {Location} location of box on board
  */
-const extractLocationFromBox = box => ({r: box.r, c: box.c});
+const extractLocationFromBox = box => {
+    return {r: box.r, c: box.c}
+}
 
 export default class Controller {
     /**
@@ -29,24 +32,36 @@ export default class Controller {
      * @param {!View} view a View instance
      */
     constructor(store, view) {
+        /**
+         * @type {!Store}
+         */
         this.store = store;
+        /**
+         * @type {!View}
+         */
         this.view = view;
-
-        // view.bindSelectBox(this.selectBox.bind(this));
-        view.bindUnselectPiece(this.unselectPiece.bind(this));
-        view.bindMovePieceIfPossible(this.movePieceIfPossible.bind(this));
-
-        this._selectedBox = emptyBox(Number(null));
-        this._lastSelectedBox = emptyBox(Number(null));
+        /**
+         * @type {!Box}
+         */
+        this._selectedBox = emptyBox(-1);
+        /**
+         * @type {!Box}
+         */
+        this._lastSelectedBox = emptyBox(-1);
+        /**
+         * @type {!Piece}
+         */
+        this._selectedCapturedPiece = initializePiece(null);
     }
 
     /**
-     * 
-     * @param {Board} [board] Optional board to pass in, else load from local storage.
+     * Set the HTML board in View, bind this.selectBox to each box in View.
+     * @param {Void}
+     * @returns {Void}
      */
-    showBoardAndBindBoxes(board) {
-        let boxes = board || this.store.getLocalStorage();
-        this.view.showBoard(boxes);
+    showBoardAndBindBoxes() {
+        let board = this.store.getLocalStorage().liveBoard;
+        this.view.showBoard(board);
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
                 let box = this.view.$board.children[0].children[r].children[c];
@@ -56,113 +71,87 @@ export default class Controller {
     }
 
     /**
-     * Place boxes on board at initial positions.
-     * Call once at the beginning of the game / on load, etc.
+     * Set the HTML captures in View, bind this.selectCapturedPiece to each captured piece in View.
+     * @param {Void}
+     * @returns {Void}
      */
-    initializeBoard() {
-        console.log('initializing the board.');
-
-        let whiteking = {};
-        whiteking.title = 'whiteking';
-        let whitequeen = {};
-        whitequeen.title = 'whitequeen';
-        let whitebishop = {};
-        whitebishop.title = 'whitebishop';
-        let whiteknight = {};
-        whiteknight.title = 'whiteknight';
-        let whiterook = {};
-        whiterook.title = 'whiterook';
-        let whitepawn = {};
-        whitepawn.title = 'whitepawn';
-        let blackking = {};
-        blackking.title = 'blackking';
-        let blackqueen = {};
-        blackqueen.title = 'blackqueen';
-        let blackbishop = {};
-        blackbishop.title = 'blackbishop';
-        let blackknight = {};
-        blackknight.title = 'blackknight';
-        let blackrook = {};
-        blackrook.title = 'blackrook';
-        let blackpawn = {};
-        blackpawn.title = 'blackpawn';
-        let boxes = Array(64);
-        for (let i = 0; i < 64; i++) boxes[i] = emptyBox(i);
-        boxes[0].piece = blackrook;
-        boxes[1].piece = blackknight;
-        boxes[2].piece = blackbishop;
-        boxes[3].piece = blackqueen;
-        boxes[4].piece = blackking;
-        boxes[5].piece = blackbishop;
-        boxes[6].piece = blackknight;
-        boxes[7].piece = blackrook;
-        for (let i = 8; i < 16; i++) boxes[i].piece = blackpawn;
-        for (let i = 48; i < 56; i++) boxes[i].piece = whitepawn;
-        boxes[56].piece = whiterook;
-        boxes[57].piece = whiteknight;
-        boxes[58].piece = whitebishop;
-        boxes[59].piece = whitequeen;
-        boxes[60].piece = whiteking;
-        boxes[61].piece = whitebishop;
-        boxes[62].piece = whiteknight;
-        boxes[63].piece = whiterook;
-
-        this.store.setLocalStorage(boxes);
-        this.showBoardAndBindBoxes(boxes);
-
-        console.log('boxes when just initialized:', boxes);
-    }
-
-    /**
-     * Set and render the current view.
-     */
-    setView() {
-        console.log('setView');
-        this._refreshBoard();
+    showAndBindCapturedPieces() {
+        let captures = this.store.getLocalStorage().liveCaptures;
+        this.view.showCaptures(captures);
+        let whiteIdx = 0;
+        let blackIdx = 0;
+        for (let i = 0; i < captures.length; i++) {
+            if (captures[i].title.indexOf('black') == 0) {
+                let piece = this.view.$capturedblack.children[0].children[blackIdx++];
+                if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
+            }
+            else if (captures[i].title.indexOf('white') == 0) {
+                let piece = this.view.$capturedwhite.children[0].children[whiteIdx++];
+                if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
+            }
+        }
     }
 
     /**
      * Update selectedPiece after seting lastSelectedPiece to current selectedPiece.
      * 
-     * @param {Element} box div of the selected box
+     * @param {!Element} box div of the selected box
      */
     selectBox(box) {
         this._lastSelectedBox = this._selectedBox;
         this._selectedBox = deserializeBoxContents(box);
-        console.log('previously selected box:', this._lastSelectedBox);
-        console.log('selected box:', this._selectedBox);
-
-        if (this.store.attemptMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox))) {
-            this.showBoardAndBindBoxes();
+        this.store.selectBox(this._selectedBox.pos);
+        if (this._lastSelectedBox.pos == this._selectedBox.pos) {
+            return;
         }
+        else if (this._lastSelectedBox.piece != null && this.store.canMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox))) {
+            this.store.movePiece(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
+            this.store.unselectBox(this._selectedBox.pos);
+            this.store.unselectBox(this._lastSelectedBox.pos);
+            this.store.updatePossibleMoves(null);
+            this._lastSelectedBox = emptyBox(-1);
+            this._selectedBox = emptyBox(-1);
+        }
+        else if (this._selectedBox.piece != null) {
+            this.store.updatePossibleMoves(null);
+            const possibleMoves = this.store.getPossibleMoves(extractLocationFromBox(this._selectedBox));
+            this.store.updatePossibleMoves(possibleMoves);
+            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+            this._lastSelectedBox = emptyBox(-1);
+        } else {
+            this.store.updatePossibleMoves(null);
+            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+            this._lastSelectedBox = emptyBox(-1);
+            this._lastSelectedBox = emptyBox(-1);
+        }
+        if (this._selectedCapturedPiece.capturedIdx != -1) {
+            this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
+        }
+        this.showAndBindCapturedPieces();
+        this.showBoardAndBindBoxes();
     }
 
     /**
-     * Unselect piece (undo what would've happened in this.selectPiece)
      * 
-     * @param {number} id ID of piece to unselect
+     * @param {Element} pieceElem
+     * @param {number} i Index of captured piece.
      */
-    unselectPiece(id) {
-        console.log('Controller.unselectPiece');
-        this._refreshBoard();
-    }
-
-    /**
-     * Move piece if possible.
-     * 
-     * @todo check with Store if possible to move
-     * @todo update View iff possible to move in Store
-     */
-    movePieceIfPossible() {
-        console.log('Controller.movePieceIfPossible');
-        this._refreshBoard();
-    }
-
-
-    /**
-     * Refresh the board.
-     */
-    _refreshBoard() {
-        
+    selectCapturedPiece(pieceElem, i) {
+        if (this._selectedCapturedPiece.capturedIdx != -1) {
+            this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
+        }
+        if (this._lastSelectedBox.piece != null || this._selectedBox.piece != null) {
+            this.store.updatePossibleMoves(null);
+            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+            this._lastSelectedBox = emptyBox(-1);
+            this._lastSelectedBox = emptyBox(-1);
+        }
+        this._selectedCapturedPiece = deserializeCapturedPiece(pieceElem);
+        this._selectedCapturedPiece.capturedIdx = i;
+        this.store.selectCapturedPiece(i);
+        this.showAndBindCapturedPieces();
+        this.showBoardAndBindBoxes();
     }
 }

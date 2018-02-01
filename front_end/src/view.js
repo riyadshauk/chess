@@ -1,32 +1,53 @@
-import {Board} from './box';
+import {Board, Location, Box, Piece} from './box';
 import {qs, $on} from './helpers';
 import Template from './template';
 
-const _boxId = element => parseInt(element.parentNode.dataset.id, 10);
-
 export default class View {
     /**
-     * @param {!Template} template A Template instance
+     * @param {Template} template A Template instance
      */
     constructor(template) {
         this.template = template;
         this.$board = qs('.chessboard');
+        this.$capturedwhite = qs('.capturedwhite');
+        this.$capturedblack = qs('.capturedblack');
         this.$main = qs('.main');
     }
 
-    showBoard(boxes) {
-        this.$board.replaceChild(this.template.Board(boxes), this.$board.firstChild);
+    /**
+     * Updates the chessboard html.
+     * @param {Board} board 
+     */
+    showBoard(board) {
+        this.$board.replaceChild(this.template.Board(board), this.$board.firstChild);
     }
 
+    /**
+     * Updates the captured pieces in the html.
+     * @param {Array<Piece>} captures 
+     */
+    showCaptures(captures) {
+        this.$capturedwhite.replaceChild(this.template.CapturedWhite(captures), this.$capturedwhite.firstChild);
+        this.$capturedblack.replaceChild(this.template.CapturedBlack(captures), this.$capturedblack.firstChild);
+    }
+
+    /**
+     * Binds handler to box, calling handler when the synthetic 'click' event is fired.
+     * @param {Element} box 
+     * @param {Function} handler 
+     */
     bindSelectBox(box, handler) {
         $on(box, 'click', ({target}) => {
             handler(box);
         });
     }
-    bindUnselectPiece(handler) {
-        // $on(this.$board, 'click', handler);
-    }
-    bindMovePieceIfPossible(handler) {
-        // $on(this.$board, 'click', handler);
+
+    /**
+     * Binds handler to piece, calling handler when the synthetic 'click' event is fired.
+     * @param {Element} piece 
+     * @param {Function} handler 
+     */
+    bindCapturedPiece(piece, i, handler) {
+        $on(piece, 'click', () => handler(piece, i));
     }
 }

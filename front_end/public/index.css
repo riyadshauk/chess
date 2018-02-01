@@ -4,14 +4,13 @@
 }
 
 table { 
-  border-collapse: collapse; 
-  border-spacing: 0; 
+  border-spacing: 2px; 
 }
 
 .chessboard { 
   padding: 0px; 
   margin: 0 auto; 
-  border: 2px solid #181818; 
+  border: 2px solid #0e7fe9; 
 }
 
 .chessboard tr td { 
@@ -19,102 +18,39 @@ table {
   height: 45px; 
 }
 
+.possibleDest {
+  filter: sepia(100%);
+  filter: hue-rotate(90deg);
+}
+
+.selected {
+  filter: opacity(25%);
+}
+
+.selectedCapture {
+  filter: opacity(25%);
+}
+
 .chessboard tr:nth-child(2n) td:nth-child(2n+1) { 
   /* https://coderbyte.com/tutorial/create-a-simple-chessboard-using-html-css-and-jquery */
-  background: #40e070;
+  background: #40e070e7;
 }
 
 .chessboard tr:nth-child(2n+1) td:nth-child(2n) { 
-  background: #40e070;
+  background: #40e070e7;
 }
 
 .chessboard tr:nth-child(2n) td:nth-child(2n) { 
-  background: #f5f106;
+  background: #f5f106a8;
 }
 
 .chessboard tr:nth-child(2n+1) td:nth-child(2n+1) { 
-  background: #f5f106;
+  background: #f5f106a8;
 }
 
 body {
   font: 14px "Century Gothic", Futura, sans-serif;
   margin: 20px;
-}
-
-ol, ul {
-  padding-left: 30px;
-}
-
-.board-row:after {
-  clear: both;
-  content: "";
-  display: table;
-}
-
-.status {
-  margin-bottom: 10px;
-}
-
-.square {
-  background: #fff;
-  border: 1px solid #999;
-  float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 45px;
-  margin-right: -1px;
-  margin-top: -1px;
-  padding: 0;
-  text-align: center;
-  width: 45px;
-}
-
-.whitesquare {
-  background: #fff;
-  border: 1px solid #999;
-  float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 45px;
-  margin-right: -1px;
-  margin-top: -1px;
-  padding: 0;
-  text-align: center;
-  width: 45px;
-}
-
-.blacksquare {
-  background: #009900;
-  border: 1px solid #999;
-  float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 45px;
-  margin-right: -1px;
-  margin-top: -1px;
-  padding: 0;
-  text-align: center;
-  width: 45px;
-}
-
-.square:focus {
-  outline: none;
-}
-
-.kbd-navigation .square:focus {
-  background: #ddd;
-}
-
-.game {
-  display: flex;
-  flex-direction: row;
-}
-
-.game-info {
-  margin-left: 20px;
 }
 
 .whiteking {
