@@ -20,14 +20,14 @@ open public/index.html # (open is a macos command, opens file in default browser
 - [ ] revisit the decision to use Google Closure Compiler, refactor
 - [ ] make tests forward-compatible with ES6 and look into testing libraries
 
-#### Todo: Chess Gameplay Features**
+#### Todo: Chess Gameplay Features
 - [ ] add game-end condition recognition
 - [ ] add undo/redo functionality (consider use of FEN, PGN, SAN)
 - [ ] add ability to load/save game
 - [ ] game timer
 - [ ] be able to play against computer/AI
 
-#### Todo: General Project Features**
+#### Todo: General Project Features
 - [ ] users & client/server
 - [ ] chat
 - [ ] ML?
