@@ -1,10 +1,10 @@
 # chess
-Though I made this game for fun, I was able to include [an online demo here](http://web.engr.illinois.edu/~shauk2/), from my alma mater (working, as of this commit, at least : )  
+Though I made this game for fun, I was able to include [an online demo here](http://web.engr.illinois.edu/~shauk2/), from my alma mater's domain (working while I still have access to the domain : )  
 
 This is a chess game written in plain/vanilla-flavored ES6 JavaScript, HTML 5, CSS, and bundled with the Google Closure Compiler. It's modeled after [the vanilla ES6 TodoMVC example](http://todomvc.com/examples/vanilla-es6/).
 ![Chessplay GIF](chessplay.gif)  
 
-#### Local Setup (copy-paste the following in a shell):
+#### Local Setup (copy-paste the following into a shell):
 ```shell
 git clone https://github.com/riyadshauk/chess
 cd chess/front_end/
@@ -13,7 +13,7 @@ npm run compile
 open public/index.html # (open is a macos command, opens file in default browser)
 ```
 
-**Note:** The game source files are already bundled into one javascript file, so it works locally without needing to install anything. Just open chess/front_end/public/index.html in a browser to play.  ######
+**Note:** The game source files are already bundled into one javascript file, so it works locally without needing to install anything. Just open chess/front_end/public/index.html in a browser to play.  
 
 #### Todo: Codebase
 - [ ] heavily refactor codebase (make more modular, less coupled)
