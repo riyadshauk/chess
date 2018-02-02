@@ -48,7 +48,7 @@ export default class Template {
         let tr = document.createElement('tr');
         for (let i = 0; i < captures.length; i++) {
             const piece = captures[i];
-            if (piece.title.indexOf(type) == 0) {
+            if (piece.title && piece.title.indexOf(type) == 0) {
                 let td = document.createElement('td');
                 let pieceDiv = document.createElement('div');
                 pieceDiv.setAttribute('class', piece.title);

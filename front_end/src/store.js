@@ -78,12 +78,42 @@ export default class Store {
         let liveCaptures = [];
 
         /**
+         * @type {Array<{src: Location, dst: Location, srcPiece: Piece, dstPiece: Piece, move: number}>}
+         */
+        let liveHistory = [];
+
+        /**
+         * @type {Array<{src: Location, dst: Location, srcPiece: Piece, dstPiece: Piece, move: number}>}
+         */
+        let liveRedoHistory = [];
+
+        /**
          * @type {{liveBoard: {Board}, livePlayer: number}}
          */
         let liveStore = {
             liveBoard: /** @type {!Board} */ (liveBoard),
             livePlayer: livePlayer,
-            liveCaptures: liveCaptures
+            liveCaptures: liveCaptures,
+            liveHistory: liveHistory,
+            liveRedoHistory: liveRedoHistory,
+            prevLiveStore: {
+                liveBoard: /** @type {!Board} */ (liveBoard),
+                livePlayer: livePlayer,
+                liveCaptures: liveCaptures,
+                liveHistory: liveHistory,
+                liveRedoHistory: liveRedoHistory,
+                prevLiveStore: undefined,
+                redoLiveStore: undefined
+            },
+            redoLiveStore: {
+                liveBoard: /** @type {!Board} */ (liveBoard),
+                livePlayer: livePlayer,
+                liveCaptures: liveCaptures,
+                liveHistory: liveHistory,
+                liveRedoHistory: liveRedoHistory,
+                prevLiveStore: undefined,
+                redoLiveStore: undefined
+            }
         };
 
         /**
@@ -104,11 +134,20 @@ export default class Store {
          * @param {Board} board Array of boxes to write
          * @param {Player=} [player] Optionally set the value of the player who is allowed to make the next move.
          * @param {Array<Piece>=} captures Optional array of captured pieces.
+         * @param {Array<{src: Location, dst: Location}>=} history
+         * @param {Array<{src: Location, dst: Location}>=} HistoryItem
+         * @param {Object=} prevLiveStore
+         * @param {Object=} redoLiveStore
          */
-        this.setLocalStorage = (board, player, captures) => {
+        this.setLocalStorage = (board, player, captures, history, redoHistory, prevLiveStore, redoLiveStore) => {
             if (Array.isArray(board)) liveStore.liveBoard = board;
             if (player === WHITE_PLAYER || player === BLACK_PLAYER) liveStore.livePlayer = player;
             if (Array.isArray(captures)) liveStore.liveCaptures = captures;
+            if (Array.isArray(history)) liveStore.liveHistory = history;
+            if (Array.isArray(redoHistory)) liveStore.liveRedoHistory = redoHistory;
+            if (prevLiveStore != undefined) liveStore.prevLiveStore = prevLiveStore;
+            if (redoLiveStore != undefined) liveStore.redoLiveStore = redoLiveStore;
+            // console.log('liveStore:', liveStore);
             localStorage.setItem(name, JSON.stringify(liveStore));
         }
 
@@ -170,13 +209,14 @@ export default class Store {
 
     /**
      * Glues this front-end game representation to my particular back-end game representation as a gameState object.
+     * @param {Board=} boardIn
      * @returns {!Object<Array<string>>}
      */
-    convertBoardToGameState() {
+    convertBoardToGameState(boardIn) {
         /**
          * @type {Board}
          */
-        let board = this.getLocalStorage().liveBoard;
+        let board = boardIn || this.getLocalStorage().liveBoard;
         let gameState = {};
         gameState.board = Array(8);
         for (let i = 0; i < gameState.board.length; i++) {
@@ -201,24 +241,81 @@ export default class Store {
     }
 
     /**
+     * @param {Location} src 
+     * @param {Board=} boardIn
+     * @returns {({move: Location, capture: Location}|undefined)}
+     */
+    getEnPassantLocationIfPossible(src, boardIn, historyIn) {
+        const srcPos = src.r*8+src.c;
+        const liveStore = this.getLocalStorage();
+        const board = boardIn || liveStore.liveBoard;
+        const history = historyIn || liveStore.liveHistory;
+        if (board[srcPos].piece && history.length != 0) {
+            const forwardDir = liveStore.livePlayer == WHITE_PLAYER ? -1 : 1;
+            const srcColor = liveStore.livePlayer == WHITE_PLAYER ? 'white' : 'black';
+            const pieceThatLastMoved = history[history.length-1].srcPiece;
+            if (board[srcPos].piece.title.indexOf('pawn') != -1 
+                && pieceThatLastMoved.title.indexOf('pawn') != -1 
+                && (pieceThatLastMoved.title.indexOf(srcColor) == -1 || (pieceThatLastMoved.r == board[srcPos].piece.r && pieceThatLastMoved.c == board[srcPos].piece.c))
+                && Math.abs(history[history.length-1].src.r - history[history.length-1].dst.r) == 2
+                && history[history.length-1].dst.r == src.r
+                && Math.abs(history[history.length-1].dst.c - src.c) == 1) {
+                    let ret = {};
+                    ret.move = {r: src.r+forwardDir, c: history[history.length-1].dst.c };
+                    ret.capture = history[history.length-1].dst;
+                    return ret;
+                }
+        }
+        return undefined;
+    }
+
+    /**
+     * 
+     * @param {GameState} gameState 
+     * @param {Location} src 
+     * @param {Location} dst 
+     * @return {(Location|boolean)} Location of piece that would be captured
+     */
+    locationIfIsCapture(gameState, src, dst) {
+        const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
+        let forwardDir = 0;
+        if (possibleEnPassantLocation && possibleEnPassantLocation.move.c == dst.c && possibleEnPassantLocation.move.r == dst.r) {
+            return possibleEnPassantLocation.capture;
+        }
+        else if (PieceGameLogic.isACapture(gameState, src, dst)) {
+            return dst;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
      * Moves the piece from src to dst, marking the piece at dst captured if it's a capture.
      * This is the only place where the player turn is updated. 
      * Updates localStorage with the updated board and player.
      * @todo add edge-case for castling logic.
      * @param {!Location} src 
      * @param {!Location} dst 
+     * @param {Object=} storeIn
      */
-    movePiece(src, dst) {
-        let gameState = this.convertBoardToGameState();
-        let store = this.getLocalStorage();
+    movePiece(src, dst, storeIn) {
+        let store = storeIn || this.getLocalStorage();
         let board = store.liveBoard;
+        const gameState = this.convertBoardToGameState(board);
         let playerTurn = store.livePlayer;
         let captures = store.liveCaptures;
-        const dstPos = dst.r*8+dst.c;
+        let dstPos = dst.r*8+dst.c;
         const srcPos = src.r*8+src.c;
-        if (PieceGameLogic.isACapture(gameState, src, dst)) {
+        let dstPiece = board[dstPos].piece;
+        const srcPiece = board[srcPos].piece;
+        const locationToCapture = this.locationIfIsCapture(gameState, src, dst);
+        if (locationToCapture != false) {
+            dstPos = locationToCapture.r*8+locationToCapture.c;
+            dstPiece = board[dstPos].piece;
             board[dstPos].piece.capturedIdx = captures.length;
             captures.push(board[dstPos].piece);
+            board[dstPos].piece = null;
         }
         if (PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst)) {
             let outDir = dst.c - src.c > 0 ? 1 : -1;
@@ -227,26 +324,34 @@ export default class Store {
             if (Math.abs(dst.c - src.c) == 3) {
                 shiftKing = 2;
                 shiftRook = 2;
-            }
-            else if (Math.abs(dst.c - src.c) == 4) {
+            } else if (Math.abs(dst.c - src.c) == 4) {
                 shiftKing = 2;
                 shiftRook = 3;
             }
             board[srcPos+outDir*shiftKing].piece = board[srcPos].piece;
-            board[srcPos+outDir*shiftKing].piece.timesMoved = board[srcPos+outDir*shiftKing].piece.timesMoved + 1; // is only a king's move.
+            board[srcPos+outDir*shiftKing].piece.timesMoved++; // is only a king's move.
             board[srcPos].piece = null;
             board[dstPos-outDir*shiftRook].piece = board[dstPos].piece;
             board[dstPos].piece = null;
-        }
-        else {
-            board[dstPos].piece = board[srcPos].piece; // deep copy, please..?
-            board[dstPos].piece.timesMoved = board[srcPos].piece.timesMoved + 1; // update timesMoved!
+        } else if(this.getEnPassantLocationIfPossible(src) != undefined) {
+            const enPassant = this.getEnPassantLocationIfPossible(src);
+            board[dst.r*8+dst.c].piece = board[src.r*8+src.c].piece;
+            board[dst.r*8+dst.c].piece.timesMoved++;
+            board[src.r*8+src.c].piece = null;
+            dstPiece = null;
+        } else {
+            board[dstPos].piece = board[srcPos].piece;
+            board[dstPos].piece.timesMoved++;
             board[srcPos].piece = null;
         }
-
+        let history = store.liveHistory;
+        history.push({src: src, dst: dst, srcPiece: srcPiece, dstPiece: dstPiece, move: history.length});
+        const prevLiveStore = Object.assign({}, store);
+        prevLiveStore.prevLiveStore = undefined;
         if (playerTurn == WHITE_PLAYER) playerTurn = BLACK_PLAYER;
         else playerTurn = WHITE_PLAYER;
-        this.setLocalStorage(board, playerTurn, captures);
+        this.setLocalStorage(board, playerTurn, captures, history, [], prevLiveStore);
+        this.promoteIfPossible(src,dst);
     }
 
     /**
@@ -293,16 +398,23 @@ export default class Store {
      * 
      * @param {!Location} src 
      * @param {!Location} dst
-     * @returns {boolean} True iff can move the piece at src to dst
+     * @returns {(Location|boolean)} False iff cannot move the piece at src to dst, else location of En Passant Move.
      */
-    canMove(src, dst) {
+    locationIfCanMove(src, dst) {
         if (!src || !dst) {
             return false;
         }
         const gameState = this.convertBoardToGameState();
         const isPossibleToMoveTo = PieceGameLogic.isPossibleToMoveTo(gameState,src);
         const canMoveToDest = isPossibleToMoveTo(dst);
-        return canMoveToDest;
+        const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
+        let canEnPassant = false;
+        if ((possibleEnPassantLocation != undefined && possibleEnPassantLocation.move.r == dst.r && possibleEnPassantLocation.move.c == dst.c) || canMoveToDest)  {
+            return dst;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -312,7 +424,12 @@ export default class Store {
      */
     getPossibleMoves(src) {
         const gameState = this.convertBoardToGameState();
-        return PieceGameLogic.getPossibleMoves(gameState,src);
+        let locations = PieceGameLogic.getPossibleMoves(gameState,src);
+        const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
+        if (possibleEnPassantLocation != undefined) {
+            locations.push(possibleEnPassantLocation.move);
+        }
+        return locations;
     }
 
     /**
@@ -336,5 +453,74 @@ export default class Store {
                 this.setLocalStorage(boxes);
                 break;
         }
+    }
+
+    /**
+     * 
+     * @param {Location} pawn 
+     * @returns {boolean}
+     */
+    canPromote(pawn) {
+        let board = this.getLocalStorage().liveBoard;
+        let history = this.getLocalStorage().liveHistory;
+        let hItem = history[history.length-1];
+        const pawnPiece = board[pawn.r*8+pawn.c].piece;
+        if (pawnPiece != null && pawnPiece.title.indexOf('pawn') != -1
+            && ((pawn.r == 0 && pawnPiece.title.indexOf('white') == 0) || (pawn.r == 7 && pawnPiece.title.indexOf('black') == 0))
+            && hItem.dst.r == pawn.r && hItem.dst.c == pawn.c
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param {Location} pawn
+     * @param {Location=} other Other piece location to promote pawn to
+     * @param {Piece=} otherPieceIn
+     * @returns {boolean} True if successfully promoted, false o.w.
+     * @description Only modifies this.liveStore.liveBoard at the title of the given pawn piece, iff valid, and sets that into localStorage.
+     */
+    promoteIfPossible(pawn, other, otherPieceIn) {
+        let board = this.getLocalStorage().liveBoard;
+        let history = this.getLocalStorage().liveHistory;
+        let hItem = history[history.length-1];
+        const pawnPiece = board[pawn.r*8+pawn.c].piece;
+        const otherPiece = otherPieceIn || board[other.r*8+other.c].piece;
+        if (pawnPiece != null && pawnPiece.title.indexOf('pawn') != -1
+            && otherPiece != null && pawnPiece.title.indexOf('white') == otherPiece.title.indexOf('white')
+            && ((pawn.r == 0 && pawnPiece.title.indexOf('white') == 0) || (pawn.r == 7 && pawnPiece.title.indexOf('black') == 0))
+            && hItem.dst.r == pawn.r && hItem.dst.c == pawn.c
+        ) {
+            board[pawn.r*8+pawn.c].piece.title = otherPiece.title;
+            const m = hItem.move;
+            history.push({src: pawn, dst: pawn, srcPiece: pawnPiece, dstPiece: pawnPiece, move: m});
+            this.setLocalStorage(board,undefined,undefined,history);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @todo Look into FEN, PGN, SAN and common implementations of keeping history
+     */
+    undoMove() {
+        // const store = this.store.getLocalStorage();
+        // store.redoLiveStore = Object.assign({}, store);
+        // store.redoLiveStore.prev
+        // store = Object.assign({}, store.prevLiveStore);
+    }
+    redoMove() {
+        
+    }
+
+    /**
+     * @todo Consider FEN, PGN, SAN, etc for this.
+     */
+    loadBoard() {
+
+    }
+    saveBoard() {
+
     }
 }

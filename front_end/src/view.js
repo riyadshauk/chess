@@ -12,6 +12,8 @@ export default class View {
         this.$capturedwhite = qs('.capturedwhite');
         this.$capturedblack = qs('.capturedblack');
         this.$main = qs('.main');
+        this.$undobtn = qs('.undo');
+        this.$redobtn = qs('.redo');
     }
 
     /**
@@ -49,5 +51,13 @@ export default class View {
      */
     bindCapturedPiece(piece, i, handler) {
         $on(piece, 'click', () => handler(piece, i));
+    }
+
+    bindUndoMove(handler) {
+        // $on(this.$undobtn, 'click', () => handler());
+    }
+
+    bindRedoMove(handler) {
+        // $on(this.$redobtn, 'click', () => handler());
     }
 }

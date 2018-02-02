@@ -1,6 +1,7 @@
 import Store from './store';
 import View from './view';
 import {Board, Box, emptyBox, initializePiece, Location} from './box';
+import { emptyPiece } from '../../model/piece/src/piece';
 
 /**
  * Deserialize the HTML data into a JS object.
@@ -52,6 +53,8 @@ export default class Controller {
          * @type {!Piece}
          */
         this._selectedCapturedPiece = initializePiece(null);
+        this.view.bindUndoMove(this.undoMove.bind(this));
+        this.view.bindRedoMove(this.redoMove.bind(this));
     }
 
     /**
@@ -81,11 +84,11 @@ export default class Controller {
         let whiteIdx = 0;
         let blackIdx = 0;
         for (let i = 0; i < captures.length; i++) {
-            if (captures[i].title.indexOf('black') == 0) {
+            if (captures[i].title && captures[i].title.indexOf('black') == 0) {
                 let piece = this.view.$capturedblack.children[0].children[blackIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
-            else if (captures[i].title.indexOf('white') == 0) {
+            else if (captures[i].title && captures[i].title.indexOf('white') == 0) {
                 let piece = this.view.$capturedwhite.children[0].children[whiteIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
@@ -104,13 +107,31 @@ export default class Controller {
         if (this._lastSelectedBox.pos == this._selectedBox.pos) {
             return;
         }
-        else if (this._lastSelectedBox.piece != null && this.store.canMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox))) {
+        let locationIfCanMove = false;
+        if (this._lastSelectedBox.piece != null) locationIfCanMove = this.store.locationIfCanMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
+        if (this._lastSelectedBox.piece != null && locationIfCanMove != false) {
             this.store.movePiece(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
-            this.store.unselectBox(this._selectedBox.pos);
             this.store.unselectBox(this._lastSelectedBox.pos);
             this.store.updatePossibleMoves(null);
             this._lastSelectedBox = emptyBox(-1);
+            if (this.store.canPromote({r: this._selectedBox.r, c: this._selectedBox.c})) {
+                alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
+            }
+            this.store.unselectBox(this._selectedBox.pos);
             this._selectedBox = emptyBox(-1);
+        }
+        else if ((this._lastSelectedBox.piece != null && this._lastSelectedBox.piece.title != null
+                && this._selectedBox.piece != null && this._selectedBox.piece.title != null
+                && (this.store.promoteIfPossible({r: this._lastSelectedBox.r, c: this._lastSelectedBox.c}, {r: this._selectedBox.r, c: this._selectedBox.c})) 
+                    || ((this._selectedCapturedPiece != null && this._selectedCapturedPiece.title != null
+                        && this._lastSelectedBox.piece != null && this._lastSelectedBox.piece.title != null
+                        && this.store.promoteIfPossible({r: this._lastSelectedBox.r, c: this._lastSelectedBox.c}, undefined, this._selectedCapturedPiece)))
+                )) {
+                    if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+                    if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+                    this.store.updatePossibleMoves(null);
+                    this._lastSelectedBox = emptyBox(-1);
+                    this._selectedBox = emptyBox(-1);
         }
         else if (this._selectedBox.piece != null) {
             this.store.updatePossibleMoves(null);
@@ -121,9 +142,12 @@ export default class Controller {
         } else {
             this.store.updatePossibleMoves(null);
             if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
             this._lastSelectedBox = emptyBox(-1);
-            this._lastSelectedBox = emptyBox(-1);
+            if (this.store.canPromote({r: this._selectedBox.r, c: this._selectedBox.c})) {
+                alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
+            }
+            if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+            this._selectedBox = emptyBox(-1);
         }
         if (this._selectedCapturedPiece.capturedIdx != -1) {
             this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
@@ -151,6 +175,36 @@ export default class Controller {
         this._selectedCapturedPiece = deserializeCapturedPiece(pieceElem);
         this._selectedCapturedPiece.capturedIdx = i;
         this.store.selectCapturedPiece(i);
+        this.showAndBindCapturedPieces();
+        this.showBoardAndBindBoxes();
+    }
+
+    undoMove() {
+        const liveStore = this.store.getLocalStorage();
+        if (liveStore.liveHistory.length == 0) return;
+        this.store.updatePossibleMoves(null);
+        if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+        if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+        if (this._selectedCapturedPiece.capturedIdx != -1) this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
+        this._selectedBox = emptyBox(-1);
+        this._lastSelectedBox = emptyBox(-1);
+        this._selectedCapturedPiece = initializePiece(null);
+        this.store.undoMove();
+        this.showAndBindCapturedPieces();
+        this.showBoardAndBindBoxes();
+    }
+
+    redoMove() {
+        const liveStore = this.store.getLocalStorage();
+        if (liveStore.liveRedoHistory.length == 0) return;
+        this.store.updatePossibleMoves(null);
+        if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
+        if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
+        if (this._selectedCapturedPiece.capturedIdx != -1) this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
+        this._selectedBox = emptyBox(-1);
+        this._lastSelectedBox = emptyBox(-1);
+        this._selectedCapturedPiece = initializePiece(null);
+        this.store.redoMove();
         this.showAndBindCapturedPieces();
         this.showBoardAndBindBoxes();
     }

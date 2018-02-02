@@ -321,17 +321,22 @@ var module$src$store = {}, Store$$module$src$store = function $Store$$module$src
     $arr$$[63].piece = Object.assign({}, $whiterook$$);
     return $arr$$;
   };
-  var $liveStore$$ = {liveBoard:this.initializeBoard(), livePlayer:module$src$box.WHITE_PLAYER, liveCaptures:[]};
+  var $liveBoard$$ = this.initializeBoard(), $livePlayer$$ = module$src$box.WHITE_PLAYER, $liveCaptures$$ = [], $liveHistory$$ = [], $liveRedoHistory$$ = [], $liveStore$$ = {liveBoard:$liveBoard$$, livePlayer:$livePlayer$$, liveCaptures:$liveCaptures$$, liveHistory:$liveHistory$$, liveRedoHistory:$liveRedoHistory$$, prevLiveStore:{liveBoard:$liveBoard$$, livePlayer:$livePlayer$$, liveCaptures:$liveCaptures$$, liveHistory:$liveHistory$$, liveRedoHistory:$liveRedoHistory$$, prevLiveStore:void 0, redoLiveStore:void 0}, 
+  redoLiveStore:{liveBoard:$liveBoard$$, livePlayer:$livePlayer$$, liveCaptures:$liveCaptures$$, liveHistory:$liveHistory$$, liveRedoHistory:$liveRedoHistory$$, prevLiveStore:void 0, redoLiveStore:void 0}};
   this.getLocalStorage = function $this$getLocalStorage$() {
     var $localStorageItem$$ = null !== $localStorage$$.getItem($name$$) ? String($localStorage$$.getItem($name$$)) : JSON.stringify($liveStore$$);
     return $liveStore$$ || JSON.parse($localStorageItem$$);
   };
-  this.setLocalStorage = function $this$setLocalStorage$($board$$, $player$$, $captures$$) {
+  this.setLocalStorage = function $this$setLocalStorage$($board$$, $player$$, $captures$$, $history$$, $redoHistory$$, $prevLiveStore$$, $redoLiveStore$$) {
     Array.isArray($board$$) && ($liveStore$$.liveBoard = $board$$);
     if ($player$$ === module$src$box.WHITE_PLAYER || $player$$ === module$src$box.BLACK_PLAYER) {
       $liveStore$$.livePlayer = $player$$;
     }
     Array.isArray($captures$$) && ($liveStore$$.liveCaptures = $captures$$);
+    Array.isArray($history$$) && ($liveStore$$.liveHistory = $history$$);
+    Array.isArray($redoHistory$$) && ($liveStore$$.liveRedoHistory = $redoHistory$$);
+    void 0 != $prevLiveStore$$ && ($liveStore$$.prevLiveStore = $prevLiveStore$$);
+    void 0 != $redoLiveStore$$ && ($liveStore$$.redoLiveStore = $redoLiveStore$$);
     $localStorage$$.setItem($name$$, JSON.stringify($liveStore$$));
   };
   $callback$$ && $callback$$();
@@ -377,8 +382,9 @@ Store$$module$src$store.prototype.convertFrontToBackEncoding = function $Store$$
   }
   return $encoding$$ ? $encoding$$ + $timesMoved$$ : $encoding$$;
 };
-Store$$module$src$store.prototype.convertBoardToGameState = function $Store$$module$src$store$$convertBoardToGameState$() {
-  var $board$$ = this.getLocalStorage().liveBoard, $gameState$$ = {};
+Store$$module$src$store.prototype.convertBoardToGameState = function $Store$$module$src$store$$convertBoardToGameState$($board$$) {
+  $board$$ = $board$$ || this.getLocalStorage().liveBoard;
+  var $gameState$$ = {};
   $gameState$$.board = Array(8);
   for (var $i$$ = 0;$i$$ < $gameState$$.board.length;$i$$++) {
     $gameState$$.board[$i$$] = [];
@@ -397,22 +403,45 @@ Store$$module$src$store.prototype.convertBoardToGameState = function $Store$$mod
   $gameState$$.player = this.getLocalStorage().livePlayer;
   return $gameState$$;
 };
-Store$$module$src$store.prototype.movePiece = function $Store$$module$src$store$$movePiece$($src$$, $dst$$) {
-  var $gameState$$27_outDir$$ = this.convertBoardToGameState(), $captures$$ = this.getLocalStorage(), $board$$ = $captures$$.liveBoard, $playerTurn$$ = $captures$$.livePlayer, $captures$$ = $captures$$.liveCaptures, $dstPos$$ = 8 * $dst$$.r + $dst$$.c, $srcPos$$ = 8 * $src$$.r + $src$$.c;
-  module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.isACapture($gameState$$27_outDir$$, $src$$, $dst$$) && ($board$$[$dstPos$$].piece.capturedIdx = $captures$$.length, $captures$$.push($board$$[$dstPos$$].piece));
-  if (module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.kingCanCastleWithGivenRook($gameState$$27_outDir$$, $src$$, $dst$$)) {
-    var $gameState$$27_outDir$$ = 0 < $dst$$.c - $src$$.c ? 1 : -1, $shiftKing$$ = 0, $shiftRook$$ = 0;
-    3 == Math.abs($dst$$.c - $src$$.c) ? $shiftRook$$ = $shiftKing$$ = 2 : 4 == Math.abs($dst$$.c - $src$$.c) && ($shiftKing$$ = 2, $shiftRook$$ = 3);
-    $board$$[$srcPos$$ + $gameState$$27_outDir$$ * $shiftKing$$].piece = $board$$[$srcPos$$].piece;
-    $board$$[$srcPos$$ + $gameState$$27_outDir$$ * $shiftKing$$].piece.timesMoved += 1;
-    $board$$[$srcPos$$].piece = null;
-    $board$$[$dstPos$$ - $gameState$$27_outDir$$ * $shiftRook$$].piece = $board$$[$dstPos$$].piece;
-    $board$$[$dstPos$$].piece = null;
-  } else {
-    $board$$[$dstPos$$].piece = $board$$[$srcPos$$].piece, $board$$[$dstPos$$].piece.timesMoved = $board$$[$srcPos$$].piece.timesMoved + 1, $board$$[$srcPos$$].piece = null;
+Store$$module$src$store.prototype.getEnPassantLocationIfPossible = function $Store$$module$src$store$$getEnPassantLocationIfPossible$($src$$, $board$$2_boardIn$$, $history$$) {
+  var $ret_srcPos$$ = 8 * $src$$.r + $src$$.c, $liveStore$$ = this.getLocalStorage();
+  $board$$2_boardIn$$ = $board$$2_boardIn$$ || $liveStore$$.liveBoard;
+  $history$$ = $history$$ || $liveStore$$.liveHistory;
+  if ($board$$2_boardIn$$[$ret_srcPos$$].piece && 0 != $history$$.length) {
+    var $forwardDir$$ = $liveStore$$.livePlayer == module$src$box.WHITE_PLAYER ? -1 : 1, $liveStore$$ = $liveStore$$.livePlayer == module$src$box.WHITE_PLAYER ? "white" : "black", $pieceThatLastMoved$$ = $history$$[$history$$.length - 1].srcPiece;
+    if (-1 != $board$$2_boardIn$$[$ret_srcPos$$].piece.title.indexOf("pawn") && -1 != $pieceThatLastMoved$$.title.indexOf("pawn") && (-1 == $pieceThatLastMoved$$.title.indexOf($liveStore$$) || $pieceThatLastMoved$$.r == $board$$2_boardIn$$[$ret_srcPos$$].piece.r && $pieceThatLastMoved$$.c == $board$$2_boardIn$$[$ret_srcPos$$].piece.c) && 2 == Math.abs($history$$[$history$$.length - 1].src.r - $history$$[$history$$.length - 1].dst.r) && $history$$[$history$$.length - 1].dst.r == $src$$.r && 1 == Math.abs($history$$[$history$$.length - 
+    1].dst.c - $src$$.c)) {
+      return $ret_srcPos$$ = {}, $ret_srcPos$$.move = {r:$src$$.r + $forwardDir$$, c:$history$$[$history$$.length - 1].dst.c}, $ret_srcPos$$.capture = $history$$[$history$$.length - 1].dst, $ret_srcPos$$;
+    }
   }
+};
+Store$$module$src$store.prototype.locationIfIsCapture = function $Store$$module$src$store$$locationIfIsCapture$($gameState$$, $src$$, $dst$$) {
+  var $possibleEnPassantLocation$$ = this.getEnPassantLocationIfPossible($src$$);
+  return $possibleEnPassantLocation$$ && $possibleEnPassantLocation$$.move.c == $dst$$.c && $possibleEnPassantLocation$$.move.r == $dst$$.r ? $possibleEnPassantLocation$$.capture : module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.isACapture($gameState$$, $src$$, $dst$$) ? $dst$$ : !1;
+};
+Store$$module$src$store.prototype.movePiece = function $Store$$module$src$store$$movePiece$($src$$, $dst$$, $board$$) {
+  var $prevLiveStore$$ = $board$$ || this.getLocalStorage();
+  $board$$ = $prevLiveStore$$.liveBoard;
+  var $gameState$$28_outDir$$ = this.convertBoardToGameState($board$$), $playerTurn$$ = $prevLiveStore$$.livePlayer, $captures$$ = $prevLiveStore$$.liveCaptures, $dstPos_history$$ = 8 * $dst$$.r + $dst$$.c, $srcPos$$ = 8 * $src$$.r + $src$$.c, $dstPiece$$ = $board$$[$dstPos_history$$].piece, $srcPiece$$ = $board$$[$srcPos$$].piece, $locationToCapture_shiftKing$$ = this.locationIfIsCapture($gameState$$28_outDir$$, $src$$, $dst$$);
+  0 != $locationToCapture_shiftKing$$ && ($dstPos_history$$ = 8 * $locationToCapture_shiftKing$$.r + $locationToCapture_shiftKing$$.c, $dstPiece$$ = $board$$[$dstPos_history$$].piece, $board$$[$dstPos_history$$].piece.capturedIdx = $captures$$.length, $captures$$.push($board$$[$dstPos_history$$].piece), $board$$[$dstPos_history$$].piece = null);
+  if (module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.kingCanCastleWithGivenRook($gameState$$28_outDir$$, $src$$, $dst$$)) {
+    var $gameState$$28_outDir$$ = 0 < $dst$$.c - $src$$.c ? 1 : -1, $shiftRook$$ = $locationToCapture_shiftKing$$ = 0;
+    3 == Math.abs($dst$$.c - $src$$.c) ? $shiftRook$$ = $locationToCapture_shiftKing$$ = 2 : 4 == Math.abs($dst$$.c - $src$$.c) && ($locationToCapture_shiftKing$$ = 2, $shiftRook$$ = 3);
+    $board$$[$srcPos$$ + $gameState$$28_outDir$$ * $locationToCapture_shiftKing$$].piece = $board$$[$srcPos$$].piece;
+    $board$$[$srcPos$$ + $gameState$$28_outDir$$ * $locationToCapture_shiftKing$$].piece.timesMoved++;
+    $board$$[$srcPos$$].piece = null;
+    $board$$[$dstPos_history$$ - $gameState$$28_outDir$$ * $shiftRook$$].piece = $board$$[$dstPos_history$$].piece;
+    $board$$[$dstPos_history$$].piece = null;
+  } else {
+    void 0 != this.getEnPassantLocationIfPossible($src$$) ? (this.getEnPassantLocationIfPossible($src$$), $board$$[8 * $dst$$.r + $dst$$.c].piece = $board$$[8 * $src$$.r + $src$$.c].piece, $board$$[8 * $dst$$.r + $dst$$.c].piece.timesMoved++, $dstPiece$$ = $board$$[8 * $src$$.r + $src$$.c].piece = null) : ($board$$[$dstPos_history$$].piece = $board$$[$srcPos$$].piece, $board$$[$dstPos_history$$].piece.timesMoved++, $board$$[$srcPos$$].piece = null);
+  }
+  $dstPos_history$$ = $prevLiveStore$$.liveHistory;
+  $dstPos_history$$.push({src:$src$$, dst:$dst$$, srcPiece:$srcPiece$$, dstPiece:$dstPiece$$, move:$dstPos_history$$.length});
+  $prevLiveStore$$ = Object.assign({}, $prevLiveStore$$);
+  $prevLiveStore$$.prevLiveStore = void 0;
   $playerTurn$$ = $playerTurn$$ == module$src$box.WHITE_PLAYER ? module$src$box.BLACK_PLAYER : module$src$box.WHITE_PLAYER;
-  this.setLocalStorage($board$$, $playerTurn$$, $captures$$);
+  this.setLocalStorage($board$$, $playerTurn$$, $captures$$, $dstPos_history$$, [], $prevLiveStore$$);
+  this.promoteIfPossible($src$$, $dst$$);
 };
 Store$$module$src$store.prototype.selectBox = function $Store$$module$src$store$$selectBox$($pos$$) {
   var $boxes$$ = this.getLocalStorage().liveBoard;
@@ -434,16 +463,18 @@ Store$$module$src$store.prototype.unSelectCapturedPiece = function $Store$$modul
   $captures$$[$pos$$].selectedCapture = !1;
   this.setLocalStorage(void 0, void 0, $captures$$);
 };
-Store$$module$src$store.prototype.canMove = function $Store$$module$src$store$$canMove$($src$$, $dst$$) {
+Store$$module$src$store.prototype.locationIfCanMove = function $Store$$module$src$store$$locationIfCanMove$($src$$, $dst$$) {
   if (!$src$$ || !$dst$$) {
     return !1;
   }
-  var $gameState$$ = this.convertBoardToGameState();
-  return module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.isPossibleToMoveTo($gameState$$, $src$$)($dst$$);
+  var $canMoveToDest_gameState$$ = this.convertBoardToGameState(), $canMoveToDest_gameState$$ = module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.isPossibleToMoveTo($canMoveToDest_gameState$$, $src$$)($dst$$), $possibleEnPassantLocation$$ = this.getEnPassantLocationIfPossible($src$$);
+  return void 0 != $possibleEnPassantLocation$$ && $possibleEnPassantLocation$$.move.r == $dst$$.r && $possibleEnPassantLocation$$.move.c == $dst$$.c || $canMoveToDest_gameState$$ ? $dst$$ : !1;
 };
-Store$$module$src$store.prototype.getPossibleMoves = function $Store$$module$src$store$$getPossibleMoves$($src$$) {
-  var $gameState$$ = this.convertBoardToGameState();
-  return module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.getPossibleMoves($gameState$$, $src$$);
+Store$$module$src$store.prototype.getPossibleMoves = function $Store$$module$src$store$$getPossibleMoves$($possibleEnPassantLocation$$2_src$$) {
+  var $gameState$$ = this.convertBoardToGameState(), $gameState$$ = module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.getPossibleMoves($gameState$$, $possibleEnPassantLocation$$2_src$$);
+  $possibleEnPassantLocation$$2_src$$ = this.getEnPassantLocationIfPossible($possibleEnPassantLocation$$2_src$$);
+  void 0 != $possibleEnPassantLocation$$2_src$$ && $gameState$$.push($possibleEnPassantLocation$$2_src$$.move);
+  return $gameState$$;
 };
 Store$$module$src$store.prototype.updatePossibleMoves = function $Store$$module$src$store$$updatePossibleMoves$($possibleMoves$$) {
   var $boxes$$ = this.getLocalStorage().liveBoard;
@@ -460,6 +491,24 @@ Store$$module$src$store.prototype.updatePossibleMoves = function $Store$$module$
         $boxes$$[8 * $loc$$.r + $loc$$.c].possibleDest = !0;
       }), this.setLocalStorage($boxes$$);
   }
+};
+Store$$module$src$store.prototype.canPromote = function $Store$$module$src$store$$canPromote$($pawn$$) {
+  var $board$$ = this.getLocalStorage().liveBoard, $hItem_history$$ = this.getLocalStorage().liveHistory, $hItem_history$$ = $hItem_history$$[$hItem_history$$.length - 1], $board$$ = $board$$[8 * $pawn$$.r + $pawn$$.c].piece;
+  return null != $board$$ && -1 != $board$$.title.indexOf("pawn") && (0 == $pawn$$.r && 0 == $board$$.title.indexOf("white") || 7 == $pawn$$.r && 0 == $board$$.title.indexOf("black")) && $hItem_history$$.dst.r == $pawn$$.r && $hItem_history$$.dst.c == $pawn$$.c ? !0 : !1;
+};
+Store$$module$src$store.prototype.promoteIfPossible = function $Store$$module$src$store$$promoteIfPossible$($pawn$$, $other$$, $otherPieceIn$$) {
+  var $board$$ = this.getLocalStorage().liveBoard, $history$$ = this.getLocalStorage().liveHistory, $hItem$$ = $history$$[$history$$.length - 1], $pawnPiece$$ = $board$$[8 * $pawn$$.r + $pawn$$.c].piece;
+  $other$$ = $otherPieceIn$$ || $board$$[8 * $other$$.r + $other$$.c].piece;
+  return null != $pawnPiece$$ && -1 != $pawnPiece$$.title.indexOf("pawn") && null != $other$$ && $pawnPiece$$.title.indexOf("white") == $other$$.title.indexOf("white") && (0 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("white") || 7 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("black")) && $hItem$$.dst.r == $pawn$$.r && $hItem$$.dst.c == $pawn$$.c ? ($board$$[8 * $pawn$$.r + $pawn$$.c].piece.title = $other$$.title, $history$$.push({src:$pawn$$, dst:$pawn$$, srcPiece:$pawnPiece$$, dstPiece:$pawnPiece$$, 
+  move:$hItem$$.move}), this.setLocalStorage($board$$, void 0, void 0, $history$$), !0) : !1;
+};
+Store$$module$src$store.prototype.undoMove = function $Store$$module$src$store$$undoMove$() {
+};
+Store$$module$src$store.prototype.redoMove = function $Store$$module$src$store$$redoMove$() {
+};
+Store$$module$src$store.prototype.loadBoard = function $Store$$module$src$store$$loadBoard$() {
+};
+Store$$module$src$store.prototype.saveBoard = function $Store$$module$src$store$$saveBoard$() {
 };
 module$src$store["default"] = Store$$module$src$store;
 var module$src$helpers = {};
@@ -502,7 +551,7 @@ Template$$module$src$template.prototype.Board = function $Template$$module$src$t
 Template$$module$src$template.prototype.Captured = function $Template$$module$src$template$$Captured$($type$$, $captures$$) {
   for (var $tr$$ = document.createElement("tr"), $i$$ = 0;$i$$ < $captures$$.length;$i$$++) {
     var $piece$$ = $captures$$[$i$$];
-    if (0 == $piece$$.title.indexOf($type$$)) {
+    if ($piece$$.title && 0 == $piece$$.title.indexOf($type$$)) {
       var $td$$ = document.createElement("td"), $pieceDiv$$ = document.createElement("div");
       $pieceDiv$$.setAttribute("class", $piece$$.title);
       $piece$$.selectedCapture && $pieceDiv$$.setAttribute("class", $piece$$.title + " selectedCapture");
@@ -525,6 +574,8 @@ var module$src$view = {}, View$$module$src$view = function $View$$module$src$vie
   this.$capturedwhite = module$src$helpers.qs(".capturedwhite");
   this.$capturedblack = module$src$helpers.qs(".capturedblack");
   this.$main = module$src$helpers.qs(".main");
+  this.$undobtn = module$src$helpers.qs(".undo");
+  this.$redobtn = module$src$helpers.qs(".redo");
 };
 View$$module$src$view.prototype.showBoard = function $View$$module$src$view$$showBoard$($board$$) {
   this.$board.replaceChild(this.template.Board($board$$), this.$board.firstChild);
@@ -543,6 +594,10 @@ View$$module$src$view.prototype.bindCapturedPiece = function $View$$module$src$v
     return $handler$$($piece$$, $i$$);
   });
 };
+View$$module$src$view.prototype.bindUndoMove = function $View$$module$src$view$$bindUndoMove$($handler$$) {
+};
+View$$module$src$view.prototype.bindRedoMove = function $View$$module$src$view$$bindRedoMove$($handler$$) {
+};
 module$src$view["default"] = View$$module$src$view;
 var module$src$controller = {}, deserializeBoxContents$$module$src$controller = function $deserializeBoxContents$$module$src$controller$($box$$) {
   var $ret$$ = module$src$box.emptyBox(Number($box$$.getAttribute("data-pos")));
@@ -558,13 +613,15 @@ var module$src$controller = {}, deserializeBoxContents$$module$src$controller = 
   this._selectedBox = module$src$box.emptyBox(-1);
   this._lastSelectedBox = module$src$box.emptyBox(-1);
   this._selectedCapturedPiece = module$src$box.initializePiece(null);
+  this.view.bindUndoMove(this.undoMove.bind(this));
+  this.view.bindRedoMove(this.redoMove.bind(this));
 };
 Controller$$module$src$controller.prototype.showBoardAndBindBoxes = function $Controller$$module$src$controller$$showBoardAndBindBoxes$() {
-  var $board$$5_r$$ = this.store.getLocalStorage().liveBoard;
-  this.view.showBoard($board$$5_r$$);
-  for ($board$$5_r$$ = 0;8 > $board$$5_r$$;$board$$5_r$$++) {
+  var $board$$8_r$$ = this.store.getLocalStorage().liveBoard;
+  this.view.showBoard($board$$8_r$$);
+  for ($board$$8_r$$ = 0;8 > $board$$8_r$$;$board$$8_r$$++) {
     for (var $c$$ = 0;8 > $c$$;$c$$++) {
-      this.view.bindSelectBox(this.view.$board.children[0].children[$board$$5_r$$].children[$c$$], this.selectBox.bind(this));
+      this.view.bindSelectBox(this.view.$board.children[0].children[$board$$8_r$$].children[$c$$], this.selectBox.bind(this));
     }
   }
 };
@@ -572,21 +629,24 @@ Controller$$module$src$controller.prototype.showAndBindCapturedPieces = function
   var $captures$$ = this.store.getLocalStorage().liveCaptures;
   this.view.showCaptures($captures$$);
   for (var $whiteIdx$$ = 0, $blackIdx$$ = 0, $i$$ = 0;$i$$ < $captures$$.length;$i$$++) {
-    if (0 == $captures$$[$i$$].title.indexOf("black")) {
+    if ($captures$$[$i$$].title && 0 == $captures$$[$i$$].title.indexOf("black")) {
       var $piece$$ = this.view.$capturedblack.children[0].children[$blackIdx$$++];
       void 0 != $piece$$ && this.view.bindCapturedPiece($piece$$, $i$$, this.selectCapturedPiece.bind(this));
     } else {
-      0 == $captures$$[$i$$].title.indexOf("white") && ($piece$$ = this.view.$capturedwhite.children[0].children[$whiteIdx$$++], void 0 != $piece$$ && this.view.bindCapturedPiece($piece$$, $i$$, this.selectCapturedPiece.bind(this)));
+      $captures$$[$i$$].title && 0 == $captures$$[$i$$].title.indexOf("white") && ($piece$$ = this.view.$capturedwhite.children[0].children[$whiteIdx$$++], void 0 != $piece$$ && this.view.bindCapturedPiece($piece$$, $i$$, this.selectCapturedPiece.bind(this)));
     }
   }
 };
-Controller$$module$src$controller.prototype.selectBox = function $Controller$$module$src$controller$$selectBox$($box$$11_possibleMoves$$) {
+Controller$$module$src$controller.prototype.selectBox = function $Controller$$module$src$controller$$selectBox$($box$$11_locationIfCanMove_possibleMoves$$) {
   this._lastSelectedBox = this._selectedBox;
-  this._selectedBox = deserializeBoxContents$$module$src$controller($box$$11_possibleMoves$$);
+  this._selectedBox = deserializeBoxContents$$module$src$controller($box$$11_locationIfCanMove_possibleMoves$$);
   this.store.selectBox(this._selectedBox.pos);
-  this._lastSelectedBox.pos != this._selectedBox.pos && (null != this._lastSelectedBox.piece && this.store.canMove(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox)) ? (this.store.movePiece(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.unselectBox(this._selectedBox.pos), this.store.unselectBox(this._lastSelectedBox.pos), 
-  this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedBox = module$src$box.emptyBox(-1)) : (null != this._selectedBox.piece ? (this.store.updatePossibleMoves(null), $box$$11_possibleMoves$$ = this.store.getPossibleMoves(extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.updatePossibleMoves($box$$11_possibleMoves$$), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos)) : (this.store.updatePossibleMoves(null), 
-  -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._selectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1)), this._lastSelectedBox = module$src$box.emptyBox(-1)), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
+  this._lastSelectedBox.pos != this._selectedBox.pos && ($box$$11_locationIfCanMove_possibleMoves$$ = !1, null != this._lastSelectedBox.piece && ($box$$11_locationIfCanMove_possibleMoves$$ = this.store.locationIfCanMove(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox))), null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && null != this._selectedBox.piece && null != this._selectedBox.piece.title && 
+  this.store.promoteIfPossible({r:this._lastSelectedBox.r, c:this._lastSelectedBox.c}, {r:this._selectedBox.r, c:this._selectedBox.c}) || null != this._selectedCapturedPiece && null != this._selectedCapturedPiece.title && null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && this.store.promoteIfPossible({r:this._lastSelectedBox.r, c:this._lastSelectedBox.c}, void 0, this._selectedCapturedPiece) ? (-1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), 
+  -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedBox = module$src$box.emptyBox(-1)) : null != this._lastSelectedBox.piece && 0 != $box$$11_locationIfCanMove_possibleMoves$$ ? (this.store.movePiece(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.unselectBox(this._lastSelectedBox.pos), 
+  this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, c:this._selectedBox.c}) && alert("Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion."), this.store.unselectBox(this._selectedBox.pos), this._selectedBox = module$src$box.emptyBox(-1)) : null != this._selectedBox.piece ? (this.store.updatePossibleMoves(null), $box$$11_locationIfCanMove_possibleMoves$$ = 
+  this.store.getPossibleMoves(extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.updatePossibleMoves($box$$11_locationIfCanMove_possibleMoves$$), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1)) : (this.store.updatePossibleMoves(null), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, 
+  c:this._selectedBox.c}) && alert("Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion."), -1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), this._selectedBox = module$src$box.emptyBox(-1)), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
 };
 Controller$$module$src$controller.prototype.selectCapturedPiece = function $Controller$$module$src$controller$$selectCapturedPiece$($pieceElem$$, $i$$) {
   -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
@@ -598,6 +658,14 @@ Controller$$module$src$controller.prototype.selectCapturedPiece = function $Cont
   this.store.selectCapturedPiece($i$$);
   this.showAndBindCapturedPieces();
   this.showBoardAndBindBoxes();
+};
+Controller$$module$src$controller.prototype.undoMove = function $Controller$$module$src$controller$$undoMove$() {
+  0 != this.store.getLocalStorage().liveHistory.length && (this.store.updatePossibleMoves(null), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), -1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this._selectedBox = module$src$box.emptyBox(-1), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedCapturedPiece = 
+  module$src$box.initializePiece(null), this.store.undoMove(), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
+};
+Controller$$module$src$controller.prototype.redoMove = function $Controller$$module$src$controller$$redoMove$() {
+  0 != this.store.getLocalStorage().liveRedoHistory.length && (this.store.updatePossibleMoves(null), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), -1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this._selectedBox = module$src$box.emptyBox(-1), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedCapturedPiece = 
+  module$src$box.initializePiece(null), this.store.redoMove(), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
 };
 module$src$controller["default"] = Controller$$module$src$controller;
 var store$$module$src$app = new module$src$store["default"]("chess-game-vanilla-es6"), template$$module$src$app = new module$src$template["default"], view$$module$src$app = new module$src$view["default"](template$$module$src$app), controller$$module$src$app = new module$src$controller["default"](store$$module$src$app, view$$module$src$app), init$$module$src$app = function $init$$module$src$app$() {
