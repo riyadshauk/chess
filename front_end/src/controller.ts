@@ -1,7 +1,6 @@
 import Store from './store';
 import View from './view';
-import {Board, Box, emptyBox, initializePiece, Location} from './box';
-import { emptyPiece } from '../../model/piece/src/piece';
+import {Board, Box, emptyBox, Piece, initializePiece, Location} from './box';
 
 /**
  * Deserialize the HTML data into a JS object.
@@ -9,7 +8,7 @@ import { emptyPiece } from '../../model/piece/src/piece';
  * @param {Element} box The raw html box from the view
  * @returns {Box} the contents of the box as a structured JS object
  */
-const deserializeBoxContents = box => {
+const deserializeBoxContents = (box: Element): Box => {
     let ret = emptyBox(Number(box.getAttribute('data-pos')));
     if (box.querySelector('div')) {
         ret.piece = initializePiece(box.querySelector('div').getAttribute('class'));
@@ -17,22 +16,27 @@ const deserializeBoxContents = box => {
     return ret;
 }
 
-const deserializeCapturedPiece = pieceElem => initializePiece(pieceElem.firstChild.getAttribute('class'));
+const deserializeCapturedPiece = (pieceElem) => initializePiece(pieceElem.firstChild.getAttribute('class'));
 
 /**
  * @param {Box} box
  * @returns {Location} location of box on board
  */
-const extractLocationFromBox = box => {
+const extractLocationFromBox = (box: Box): Location => {
     return {r: box.r, c: box.c}
 }
 
 export default class Controller {
+    private store: Store;
+    private view: View;
+    private _selectedBox: Box;
+    private _lastSelectedBox: Box;
+    private _selectedCapturedPiece: Piece;
     /**
      * @param {!Store} store A store instance
      * @param {!View} view a View instance
      */
-    constructor(store, view) {
+    constructor(store: Store, view: View) {
         /**
          * @type {!Store}
          */
@@ -67,7 +71,7 @@ export default class Controller {
         this.view.showBoard(board);
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
-                let box = this.view.$board.children[0].children[r].children[c];
+                let box = this.view.get$board().children[0].children[r].children[c];
                 this.view.bindSelectBox(box, this.selectBox.bind(this));
             }
         }
@@ -85,11 +89,11 @@ export default class Controller {
         let blackIdx = 0;
         for (let i = 0; i < captures.length; i++) {
             if (captures[i].title && captures[i].title.indexOf('black') == 0) {
-                let piece = this.view.$capturedblack.children[0].children[blackIdx++];
+                let piece = this.view.get$capturedblack().children[0].children[blackIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
             else if (captures[i].title && captures[i].title.indexOf('white') == 0) {
-                let piece = this.view.$capturedwhite.children[0].children[whiteIdx++];
+                let piece = this.view.get$capturedwhite().children[0].children[whiteIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
         }
@@ -100,14 +104,14 @@ export default class Controller {
      * 
      * @param {!Element} box div of the selected box
      */
-    selectBox(box) {
+    selectBox(box: Element) {
         this._lastSelectedBox = this._selectedBox;
         this._selectedBox = deserializeBoxContents(box);
         this.store.selectBox(this._selectedBox.pos);
         if (this._lastSelectedBox.pos == this._selectedBox.pos) {
             return;
         }
-        let locationIfCanMove = false;
+        let locationIfCanMove = undefined;
         if (this._lastSelectedBox.piece != null) locationIfCanMove = this.store.locationIfCanMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
         if (this._lastSelectedBox.piece != null && locationIfCanMove != false) {
             this.store.movePiece(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
@@ -161,7 +165,7 @@ export default class Controller {
      * @param {Element} pieceElem
      * @param {number} i Index of captured piece.
      */
-    selectCapturedPiece(pieceElem, i) {
+    selectCapturedPiece(pieceElem: Element, i: number) {
         if (this._selectedCapturedPiece.capturedIdx != -1) {
             this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
         }

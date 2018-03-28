@@ -1,14 +1,21 @@
 /**
  * @typedef {!{pos: number, r: number, c: number, piece: (Piece|null), selected: boolean, possibleDest: boolean}}
  */
-export var Box;
+export interface Box {
+    pos: number;
+    r: number;
+    c: number;
+    piece: Piece | null;
+    selected: boolean;
+    possibleDest: boolean;
+}
 
 /**
  * @function
  * @param {!number} pos
  * @returns {Box}
  */
-export function emptyBox(pos) {
+export function emptyBox(pos: number): Box {
     return {
         pos: pos,
         r: Math.trunc(pos/8),
@@ -22,19 +29,27 @@ export function emptyBox(pos) {
 /**
  * @typedef {!{r: number, c: number}}
  */
-export var Location;
+export interface Location {
+    r: number;
+    c: number;
+}
 
 /**
  * @typedef {!{title: string, timesMoved: number, capturedIdx: number, selectedCapture: boolean}}
  */
-export var Piece;
+export interface Piece {
+    title: string;
+    timesMoved: number;
+    capturedIdx: number;
+    selectedCapture: boolean;
+}
 
 /**
  * @function
  * @param {!string} title 
  * @returns {!Piece}
  */
-export function initializePiece(title) {
+export function initializePiece(title: string): Piece {
     return {
         title: title,
         timesMoved: 0,
@@ -46,19 +61,19 @@ export function initializePiece(title) {
 /**
  * @typedef {!number}
  */
-export var Player;
+export type Player = number;
 
 /**
  * @type {!Player}
  */
-export const WHITE_PLAYER = 0;
+export const WHITE_PLAYER: Player = 0;
 
 /**
  * @type {!Player}
  */
-export const BLACK_PLAYER = 1;
+export const BLACK_PLAYER: Player = 1;
 
 /**
  * @typedef {!Array<Box>}
  */
-export var Board;
+export type Board = Array<Box>;

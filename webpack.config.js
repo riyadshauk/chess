@@ -1,7 +1,7 @@
 const path = require('path');
 // https://webpack.js.org/guides/typescript/
 module.exports = {
-  entry: path.resolve('./front_end/src/app.js'),
+  entry: path.resolve('./front_end/src/app.ts'),
   devtool: 'inline-source-map',
   output: {
     filename: 'wp_bundle.js',

@@ -1,66 +1,51 @@
 import {Board, Location, Box, emptyBox, Piece, initializePiece, Player, WHITE_PLAYER, BLACK_PLAYER} from './box';
 import {PieceGameLogic} from '../../model/piecegamelogic/src/piecegamelogic';
 
+/**
+ * This is the GameState interface that I decided to use in model
+ * @todo refactor this interface so it doesn't have a board that is Array<string>. eg use OOP.
+ */
+interface GameState { // @todo move out to some model-level interface with front-end?
+    board: Array<string>;
+    numRows: number;
+    numCols: number;
+    playerWhite: Player;
+    playerBlack: Player;
+    player: Player;
+};
+
 export default class Store {
+    private liveStore = {
+        liveBoard: [],
+        livePlayer: -1,
+        liveCaptures: [],
+        liveHistory: [],
+        liveRedoHistory: [],
+        prevLiveStore: {
+            liveBoard: [],
+            livePlayer: -1,
+            liveCaptures: [],
+            liveHistory: [],
+            liveRedoHistory: [],
+            prevLiveStore: undefined,
+            redoLiveStore: undefined
+        },
+        redoLiveStore: {
+            liveBoard: [],
+            livePlayer: -1,
+            liveCaptures: [],
+            liveHistory: [],
+            liveRedoHistory: [],
+            prevLiveStore: undefined,
+            redoLiveStore: undefined
+        }
+    };
+    private localStorage = window.localStorage;
     /**
      * @param {!string} name Database name
      * @param {function()} [callback] Called when Store is ready
      */
-    constructor(name, callback) {
-        /**
-         * @type {Storage}
-         */
-        const localStorage = window.localStorage;
-
-        /**
-         * @returns {Board} the initial board with all pieces in their starting positions
-         */
-        this.initializeBoard = () => {
-            const whiteking = initializePiece('whiteking');
-            const whitequeen = initializePiece('whitequeen');
-            const whitebishop = initializePiece('whitebishop');
-            const whiteknight = initializePiece('whiteknight');
-            const whiterook = initializePiece('whiterook');
-            const whitepawn = initializePiece('whitepawn');
-            const blackking = initializePiece('blackking');
-            const blackqueen = initializePiece('blackqueen');
-            const blackbishop = initializePiece('blackbishop');
-            const blackknight = initializePiece('blackknight');
-            const blackrook = initializePiece('blackrook');
-            const blackpawn = initializePiece('blackpawn');
-            /**
-             * @returns {Board}
-             */
-            const emptyBoard = function() {
-                const arr = [];
-                for (let i = 0; i < 64; i++) arr[i] = emptyBox(i);
-                return arr;
-            };
-            /**
-             * @type {Board}
-             */
-            const boxes = emptyBoard();
-            boxes[0].piece = Object.assign({},blackrook);
-            boxes[1].piece = Object.assign({},blackknight);
-            boxes[2].piece = Object.assign({},blackbishop);
-            boxes[3].piece = Object.assign({},blackqueen);
-            boxes[4].piece = Object.assign({},blackking);
-            boxes[5].piece = Object.assign({},blackbishop);
-            boxes[6].piece = Object.assign({},blackknight);
-            boxes[7].piece = Object.assign({},blackrook);
-            for (let i = 8; i < 16; i++) boxes[i].piece = Object.assign({},blackpawn);
-            for (let i = 48; i < 56; i++) boxes[i].piece = Object.assign({},whitepawn);
-            boxes[56].piece = Object.assign({},whiterook);
-            boxes[57].piece = Object.assign({},whiteknight);
-            boxes[58].piece = Object.assign({},whitebishop);
-            boxes[59].piece = Object.assign({},whitequeen);
-            boxes[60].piece = Object.assign({},whiteking);
-            boxes[61].piece = Object.assign({},whitebishop);
-            boxes[62].piece = Object.assign({},whiteknight);
-            boxes[63].piece = Object.assign({},whiterook);
-            return boxes;
-        }
-
+    constructor(name: string, callback?: Function) {
         /**
          * @type {Board}
          */
@@ -90,7 +75,7 @@ export default class Store {
         /**
          * @type {{liveBoard: {Board}, livePlayer: number}}
          */
-        let liveStore = {
+        this.liveStore = {
             liveBoard: /** @type {!Board} */ (liveBoard),
             livePlayer: livePlayer,
             liveCaptures: liveCaptures,
@@ -116,54 +101,103 @@ export default class Store {
             }
         };
 
-        /**
-         * Read the Board and current player from localStorage.
-         * @returns {{liveBoard: Board, livePlayer: number}}
-         */
-        this.getLocalStorage = () => {
-            /**
-             * @type {string}
-             */
-            const localStorageItem = localStorage.getItem(name) !== null ? String(localStorage.getItem(name)) : JSON.stringify(liveStore);
-            return liveStore || JSON.parse(localStorageItem);
-        }
-
-        /**
-         * Write the local Board to localStorage.
-         * 
-         * @param {Board} board Array of boxes to write
-         * @param {Player=} [player] Optionally set the value of the player who is allowed to make the next move.
-         * @param {Array<Piece>=} captures Optional array of captured pieces.
-         * @param {Array<{src: Location, dst: Location}>=} history
-         * @param {Array<{src: Location, dst: Location}>=} HistoryItem
-         * @param {Object=} prevLiveStore
-         * @param {Object=} redoLiveStore
-         */
-        this.setLocalStorage = (board, player, captures, history, redoHistory, prevLiveStore, redoLiveStore) => {
-            if (Array.isArray(board)) liveStore.liveBoard = board;
-            if (player === WHITE_PLAYER || player === BLACK_PLAYER) liveStore.livePlayer = player;
-            if (Array.isArray(captures)) liveStore.liveCaptures = captures;
-            if (Array.isArray(history)) liveStore.liveHistory = history;
-            if (Array.isArray(redoHistory)) liveStore.liveRedoHistory = redoHistory;
-            if (prevLiveStore != undefined) liveStore.prevLiveStore = prevLiveStore;
-            if (redoLiveStore != undefined) liveStore.redoLiveStore = redoLiveStore;
-            // console.log('liveStore:', liveStore);
-            localStorage.setItem(name, JSON.stringify(liveStore));
-        }
-
         if (callback) {
             callback();
         }
     }
 
     /**
+     * @returns {Board} the initial board with all pieces in their starting positions
+     */
+    private initializeBoard = () => {
+        const whiteking = initializePiece('whiteking');
+        const whitequeen = initializePiece('whitequeen');
+        const whitebishop = initializePiece('whitebishop');
+        const whiteknight = initializePiece('whiteknight');
+        const whiterook = initializePiece('whiterook');
+        const whitepawn = initializePiece('whitepawn');
+        const blackking = initializePiece('blackking');
+        const blackqueen = initializePiece('blackqueen');
+        const blackbishop = initializePiece('blackbishop');
+        const blackknight = initializePiece('blackknight');
+        const blackrook = initializePiece('blackrook');
+        const blackpawn = initializePiece('blackpawn');
+        /**
+         * @returns {Board}
+         */
+        const emptyBoard = function() {
+            const arr = [];
+            for (let i = 0; i < 64; i++) arr[i] = emptyBox(i);
+            return arr;
+        };
+        /**
+         * @type {Board}
+         */
+        const boxes = emptyBoard();
+        boxes[0].piece = Object.assign({},blackrook);
+        boxes[1].piece = Object.assign({},blackknight);
+        boxes[2].piece = Object.assign({},blackbishop);
+        boxes[3].piece = Object.assign({},blackqueen);
+        boxes[4].piece = Object.assign({},blackking);
+        boxes[5].piece = Object.assign({},blackbishop);
+        boxes[6].piece = Object.assign({},blackknight);
+        boxes[7].piece = Object.assign({},blackrook);
+        for (let i = 8; i < 16; i++) boxes[i].piece = Object.assign({},blackpawn);
+        for (let i = 48; i < 56; i++) boxes[i].piece = Object.assign({},whitepawn);
+        boxes[56].piece = Object.assign({},whiterook);
+        boxes[57].piece = Object.assign({},whiteknight);
+        boxes[58].piece = Object.assign({},whitebishop);
+        boxes[59].piece = Object.assign({},whitequeen);
+        boxes[60].piece = Object.assign({},whiteking);
+        boxes[61].piece = Object.assign({},whitebishop);
+        boxes[62].piece = Object.assign({},whiteknight);
+        boxes[63].piece = Object.assign({},whiterook);
+        return boxes;
+    }
+
+    /**
+     * Read the Board and current player from localStorage.
+     * @returns {{liveBoard: Board, livePlayer: number}}
+     */
+    public getLocalStorage() {
+        /**
+         * @type {string}
+         */
+        const localStorageItem = this.localStorage.getItem(name) !== null ? String(this.localStorage.getItem(name)) : JSON.stringify(this.liveStore);
+        return this.liveStore || JSON.parse(localStorageItem);
+    }
+
+    /**
+     * Write the local Board to localStorage.
+     * 
+     * @param {Board} board Array of boxes to write
+     * @param {Player=} [player] Optionally set the value of the player who is allowed to make the next move.
+     * @param {Array<Piece>=} captures Optional array of captured pieces.
+     * @param {Array<{src: Location, dst: Location}>=} history
+     * @param {Array<{src: Location, dst: Location}>=} HistoryItem
+     * @param {Object=} prevLiveStore
+     * @param {Object=} redoLiveStore
+     */
+    setLocalStorage(board?: Board, player?: Player, captures?: Array<Piece>, history?: Array<{src: Location, dst: Location}>, redoHistory?: Array<{src: Location, dst: Location}>, prevLiveStore?: any, redoLiveStore?: any) {
+        if (Array.isArray(board)) this.liveStore.liveBoard = board;
+        if (player === WHITE_PLAYER || player === BLACK_PLAYER) this.liveStore.livePlayer = player;
+        if (Array.isArray(captures)) this.liveStore.liveCaptures = captures;
+        if (Array.isArray(history)) this.liveStore.liveHistory = history;
+        if (Array.isArray(redoHistory)) this.liveStore.liveRedoHistory = redoHistory;
+        if (prevLiveStore != undefined) this.liveStore.prevLiveStore = prevLiveStore;
+        if (redoLiveStore != undefined) this.liveStore.redoLiveStore = redoLiveStore;
+        // console.log('this.liveStore:', this.liveStore);
+        localStorage.setItem(name, JSON.stringify(this.liveStore));
+    }
+
+    /**
      * Glues this front-end piece representation to my particular back-end piece representation (as seen in my gameState.js).
-     * @param {!string} str encoding of a piece in this front-end representation
+     * @param {!string} s encoding of a piece in this front-end representation
      * @returns {!string} encoding of a piece that my particular back-end understands.
      */
-    convertFrontToBackEncoding(str, timesMoved) {
+    convertFrontToBackEncoding(s: string, timesMoved: number): string {
         let encoding = '';
-        switch(str) {
+        switch(s) {
             case 'whitepawn':
                 encoding = 'P';
                 break;
@@ -212,13 +246,19 @@ export default class Store {
      * @param {Board=} boardIn
      * @returns {!Object<Array<string>>}
      */
-    convertBoardToGameState(boardIn) {
+    convertBoardToGameState(boardIn?: Board): GameState {
         /**
          * @type {Board}
          */
         let board = boardIn || this.getLocalStorage().liveBoard;
-        let gameState = {};
-        gameState.board = Array(8);
+        const gameState = {
+            board: Array(8),
+            numRows: 8,
+            numCols: 8,
+            playerWhite: 0,
+            playerBlack: 1,
+            player: this.getLocalStorage().livePlayer,
+        };
         for (let i = 0; i < gameState.board.length; i++) {
             gameState.board[i] = [];
             for (let k = 0; k < 8; k++) gameState.board[i].push(' '); // Array.fill(' ');
@@ -229,14 +269,6 @@ export default class Store {
                 }
             }
         }
-        /**
-         * @todo fix this to avoid errors / use wrapper function or object.
-         */
-        gameState.numRows = 8;
-        gameState.numCols = 8;
-        gameState.playerWhite = 0;
-        gameState.playerBlack = 1;
-        gameState.player = this.getLocalStorage().livePlayer;
         return gameState;
     }
 
@@ -245,7 +277,7 @@ export default class Store {
      * @param {Board=} boardIn
      * @returns {({move: Location, capture: Location}|undefined)}
      */
-    getEnPassantLocationIfPossible(src, boardIn, historyIn) {
+    getEnPassantLocationIfPossible(src: Location, boardIn?: Board, historyIn?): {move: Location, capture: Location} | undefined {
         const srcPos = src.r*8+src.c;
         const liveStore = this.getLocalStorage();
         const board = boardIn || liveStore.liveBoard;
@@ -260,7 +292,10 @@ export default class Store {
                 && Math.abs(history[history.length-1].src.r - history[history.length-1].dst.r) == 2
                 && history[history.length-1].dst.r == src.r
                 && Math.abs(history[history.length-1].dst.c - src.c) == 1) {
-                    let ret = {};
+                    const ret = {
+                        move: undefined,
+                        capture: undefined,
+                    };
                     ret.move = {r: src.r+forwardDir, c: history[history.length-1].dst.c };
                     ret.capture = history[history.length-1].dst;
                     return ret;
@@ -276,7 +311,7 @@ export default class Store {
      * @param {Location} dst 
      * @return {(Location|boolean)} Location of piece that would be captured
      */
-    locationIfIsCapture(gameState, src, dst) {
+    locationIfIsCapture(gameState: GameState, src: Location, dst: Location): Location | boolean {
         const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
         let forwardDir = 0;
         if (possibleEnPassantLocation && possibleEnPassantLocation.move.c == dst.c && possibleEnPassantLocation.move.r == dst.r) {
@@ -299,19 +334,19 @@ export default class Store {
      * @param {!Location} dst 
      * @param {Object=} storeIn
      */
-    movePiece(src, dst, storeIn) {
+    movePiece(src: Location, dst: Location, storeIn?: Object) {
         let store = storeIn || this.getLocalStorage();
         let board = store.liveBoard;
         const gameState = this.convertBoardToGameState(board);
         let playerTurn = store.livePlayer;
         let captures = store.liveCaptures;
-        let dstPos = dst.r*8+dst.c;
+        let dstPos: number = dst.r*8+dst.c;
         const srcPos = src.r*8+src.c;
         let dstPiece = board[dstPos].piece;
         const srcPiece = board[srcPos].piece;
-        const locationToCapture = this.locationIfIsCapture(gameState, src, dst);
+        const locationToCapture: Location | boolean = this.locationIfIsCapture(gameState, src, dst);
         if (locationToCapture != false) {
-            dstPos = locationToCapture.r*8+locationToCapture.c;
+            dstPos = (<Location>locationToCapture).r*8 + (<Location>locationToCapture).c;
             dstPiece = board[dstPos].piece;
             board[dstPos].piece.capturedIdx = captures.length;
             captures.push(board[dstPos].piece);
@@ -363,7 +398,7 @@ export default class Store {
      * Sets the box on the Board as selected.
      * @param {number} pos Index of box in Board.
      */
-    selectBox(pos) {
+    selectBox(pos: number) {
         let boxes = this.getLocalStorage().liveBoard;
         boxes[pos].selected = true;
         this.setLocalStorage(boxes);
@@ -373,7 +408,7 @@ export default class Store {
      * Sets the box on the Board as unselected.
      * @param {number} pos Index of box in Board.
      */
-    unselectBox(pos) {
+    unselectBox(pos: number) {
         let boxes = this.getLocalStorage().liveBoard;
         boxes[pos].selected = false;
         this.setLocalStorage(boxes);
@@ -383,7 +418,7 @@ export default class Store {
      * 
      * @param {number} pos Index of the captured piece in liveCaptures.
      */
-    selectCapturedPiece(pos) {
+    selectCapturedPiece(pos: number) {
         let captures = this.getLocalStorage().liveCaptures;
         captures[pos].selectedCapture = true;
         this.setLocalStorage(undefined, undefined, captures);
@@ -393,7 +428,7 @@ export default class Store {
      * 
      * @param {number} pos Index of the captured piece in liveCaptures.
      */
-    unSelectCapturedPiece(pos) {
+    unSelectCapturedPiece(pos: number) {
         let captures = this.getLocalStorage().liveCaptures;
         captures[pos].selectedCapture = false;
         this.setLocalStorage(undefined, undefined, captures);
@@ -405,7 +440,7 @@ export default class Store {
      * @param {!Location} dst
      * @returns {(Location|boolean)} False iff cannot move the piece at src to dst, else location of En Passant Move.
      */
-    locationIfCanMove(src, dst) {
+    locationIfCanMove(src: Location, dst: Location): Location | boolean {
         if (!src || !dst) {
             return false;
         }
@@ -427,7 +462,7 @@ export default class Store {
      * @param {!Location} src 
      * @returns {!Array<Location>}
      */
-    getPossibleMoves(src) {
+    getPossibleMoves(src: Location): Array<Location> {
         const gameState = this.convertBoardToGameState();
         let locations = PieceGameLogic.getPossibleMoves(gameState,src);
         const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
@@ -441,7 +476,7 @@ export default class Store {
      * 
      * @param {(Array<Location>|null)} possibleMoves 
      */
-    updatePossibleMoves(possibleMoves) {
+    updatePossibleMoves(possibleMoves?: Array<Location>) {
         let boxes = this.getLocalStorage().liveBoard;
         switch(possibleMoves) {
             case null:
@@ -465,7 +500,7 @@ export default class Store {
      * @param {Location} pawn 
      * @returns {boolean}
      */
-    canPromote(pawn) {
+    canPromote(pawn: Location): boolean {
         let board = this.getLocalStorage().liveBoard;
         let history = this.getLocalStorage().liveHistory;
         let hItem = history[history.length-1];
@@ -486,7 +521,7 @@ export default class Store {
      * @returns {boolean} True if successfully promoted, false o.w.
      * @description Only modifies this.liveStore.liveBoard at the title of the given pawn piece, iff valid, and sets that into localStorage.
      */
-    promoteIfPossible(pawn, other, otherPieceIn) {
+    promoteIfPossible(pawn: Location, other?: Location, otherPieceIn?: Piece): boolean {
         let board = this.getLocalStorage().liveBoard;
         let history = this.getLocalStorage().liveHistory;
         let player = this.getLocalStorage().livePlayer;

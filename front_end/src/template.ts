@@ -1,6 +1,6 @@
-import {Board, emptyBox} from './box';
+import { Board, emptyBox, Piece } from './box';
 
-import {escapeForHTML} from './helpers';
+import { escapeForHTML } from './helpers';
 
 export default class Template {
     /**
@@ -11,14 +11,14 @@ export default class Template {
      * @param {Board} boxes Array containing boxes
      * @returns {!Element} Contents of the board (as a table)
      */
-    Board(boxes) {
+    Board(boxes: Board): Element {
         let board = document.createElement('board');
         let boxPos = 0;
         for (let r = 0; r < 8; r++) {
             let tr = document.createElement('tr');
             for (let c = 0; c < 8; c++) {
                 let td = document.createElement('td');
-                td.setAttribute('data-pos', boxPos);
+                td.setAttribute('data-pos', String(boxPos));
                 const box = boxes[r*8+c];
                 const piece = box.piece;
                 if (piece) {
@@ -44,7 +44,7 @@ export default class Template {
      * @param {!Array<Piece>} captures 
      * @returns {Element}
      */
-    Captured(type, captures) {
+    Captured(type: string, captures: Array<Piece>): Element {
         let tr = document.createElement('tr');
         for (let i = 0; i < captures.length; i++) {
             const piece = captures[i];
@@ -65,14 +65,14 @@ export default class Template {
      * @param {!Board} boxes
      * @returns {Element} 
      */
-    CapturedWhite(boxes) {
+    CapturedWhite(boxes: Array<Piece>): Element {
         return this.Captured('white', boxes);
     }
     /**
      * @param {!Board} boxes 
      * @returns {Element}
      */
-    CapturedBlack(boxes) {
+    CapturedBlack(boxes: Array<Piece>): Element {
         return this.Captured('black', boxes);
     }
 }

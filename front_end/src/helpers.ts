@@ -7,7 +7,7 @@
  * @param {string} selector
  * @param {Element} [scope]
  */
-export function qs(selector, scope) {
+export function qs(selector: string, scope?: Element) {
     return (scope || document).querySelector(selector);
 }
 
@@ -19,7 +19,7 @@ export function qs(selector, scope) {
  * @param {Function} callback Event callback
  * @param {boolean} [capture] Capture the event
  */
-export function $on(target, type, callback, capture) {
+export function $on(target: Element | Window, type: string, callback: EventListenerOrEventListenerObject, capture?: boolean | AddEventListenerOptions) { // @todo fix callback type
     target.addEventListener(type, callback, !!capture);
 }
 
@@ -37,4 +37,4 @@ export function $on(target, type, callback, capture) {
  * 
  * @returns {string} String with unsafe characters escaped.
  */
-export const escapeForHTML = s => s.replace(/[&<]/g, c => c === '&' ? '&amp;' : '&lt;');
+export const escapeForHTML = (s: string): string => s.replace(/[&<]/g, c => c === '&' ? '&amp;' : '&lt;');
