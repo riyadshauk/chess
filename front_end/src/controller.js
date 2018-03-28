@@ -144,7 +144,7 @@ export default class Controller {
             if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
             this._lastSelectedBox = emptyBox(-1);
             if (this.store.canPromote({r: this._selectedBox.r, c: this._selectedBox.c})) {
-                alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
+                // alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
             }
             if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
             this._selectedBox = emptyBox(-1);

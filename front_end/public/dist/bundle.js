@@ -419,29 +419,30 @@ Store$$module$src$store.prototype.locationIfIsCapture = function $Store$$module$
   var $possibleEnPassantLocation$$ = this.getEnPassantLocationIfPossible($src$$);
   return $possibleEnPassantLocation$$ && $possibleEnPassantLocation$$.move.c == $dst$$.c && $possibleEnPassantLocation$$.move.r == $dst$$.r ? $possibleEnPassantLocation$$.capture : module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.isACapture($gameState$$, $src$$, $dst$$) ? $dst$$ : !1;
 };
-Store$$module$src$store.prototype.movePiece = function $Store$$module$src$store$$movePiece$($src$$, $dst$$, $board$$) {
-  var $prevLiveStore$$ = $board$$ || this.getLocalStorage();
-  $board$$ = $prevLiveStore$$.liveBoard;
-  var $gameState$$28_outDir$$ = this.convertBoardToGameState($board$$), $playerTurn$$ = $prevLiveStore$$.livePlayer, $captures$$ = $prevLiveStore$$.liveCaptures, $dstPos_history$$ = 8 * $dst$$.r + $dst$$.c, $srcPos$$ = 8 * $src$$.r + $src$$.c, $dstPiece$$ = $board$$[$dstPos_history$$].piece, $srcPiece$$ = $board$$[$srcPos$$].piece, $locationToCapture_shiftKing$$ = this.locationIfIsCapture($gameState$$28_outDir$$, $src$$, $dst$$);
+Store$$module$src$store.prototype.movePiece = function $Store$$module$src$store$$movePiece$($src$$, $dst$$17_prevLiveStore$$, $board$$) {
+  var $store$$ = $board$$ || this.getLocalStorage();
+  $board$$ = $store$$.liveBoard;
+  var $gameState$$28_outDir$$ = this.convertBoardToGameState($board$$), $playerTurn$$ = $store$$.livePlayer, $captures$$ = $store$$.liveCaptures, $dstPos_history$$ = 8 * $dst$$17_prevLiveStore$$.r + $dst$$17_prevLiveStore$$.c, $srcPos$$ = 8 * $src$$.r + $src$$.c, $dstPiece$$ = $board$$[$dstPos_history$$].piece, $srcPiece$$ = $board$$[$srcPos$$].piece, $locationToCapture_shiftKing$$ = this.locationIfIsCapture($gameState$$28_outDir$$, $src$$, $dst$$17_prevLiveStore$$);
   0 != $locationToCapture_shiftKing$$ && ($dstPos_history$$ = 8 * $locationToCapture_shiftKing$$.r + $locationToCapture_shiftKing$$.c, $dstPiece$$ = $board$$[$dstPos_history$$].piece, $board$$[$dstPos_history$$].piece.capturedIdx = $captures$$.length, $captures$$.push($board$$[$dstPos_history$$].piece), $board$$[$dstPos_history$$].piece = null);
-  if (module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.kingCanCastleWithGivenRook($gameState$$28_outDir$$, $src$$, $dst$$)) {
-    var $gameState$$28_outDir$$ = 0 < $dst$$.c - $src$$.c ? 1 : -1, $shiftRook$$ = $locationToCapture_shiftKing$$ = 0;
-    3 == Math.abs($dst$$.c - $src$$.c) ? $shiftRook$$ = $locationToCapture_shiftKing$$ = 2 : 4 == Math.abs($dst$$.c - $src$$.c) && ($locationToCapture_shiftKing$$ = 2, $shiftRook$$ = 3);
+  if (module$__$model$piecegamelogic$src$piecegamelogic.PieceGameLogic.kingCanCastleWithGivenRook($gameState$$28_outDir$$, $src$$, $dst$$17_prevLiveStore$$)) {
+    var $gameState$$28_outDir$$ = 0 < $dst$$17_prevLiveStore$$.c - $src$$.c ? 1 : -1, $shiftRook$$ = $locationToCapture_shiftKing$$ = 0;
+    3 == Math.abs($dst$$17_prevLiveStore$$.c - $src$$.c) ? $shiftRook$$ = $locationToCapture_shiftKing$$ = 2 : 4 == Math.abs($dst$$17_prevLiveStore$$.c - $src$$.c) && ($locationToCapture_shiftKing$$ = 2, $shiftRook$$ = 3);
     $board$$[$srcPos$$ + $gameState$$28_outDir$$ * $locationToCapture_shiftKing$$].piece = $board$$[$srcPos$$].piece;
     $board$$[$srcPos$$ + $gameState$$28_outDir$$ * $locationToCapture_shiftKing$$].piece.timesMoved++;
     $board$$[$srcPos$$].piece = null;
     $board$$[$dstPos_history$$ - $gameState$$28_outDir$$ * $shiftRook$$].piece = $board$$[$dstPos_history$$].piece;
     $board$$[$dstPos_history$$].piece = null;
   } else {
-    void 0 != this.getEnPassantLocationIfPossible($src$$) ? (this.getEnPassantLocationIfPossible($src$$), $board$$[8 * $dst$$.r + $dst$$.c].piece = $board$$[8 * $src$$.r + $src$$.c].piece, $board$$[8 * $dst$$.r + $dst$$.c].piece.timesMoved++, $dstPiece$$ = $board$$[8 * $src$$.r + $src$$.c].piece = null) : ($board$$[$dstPos_history$$].piece = $board$$[$srcPos$$].piece, $board$$[$dstPos_history$$].piece.timesMoved++, $board$$[$srcPos$$].piece = null);
+    void 0 != this.getEnPassantLocationIfPossible($src$$) ? (this.getEnPassantLocationIfPossible($src$$), $board$$[8 * $dst$$17_prevLiveStore$$.r + $dst$$17_prevLiveStore$$.c].piece = $board$$[8 * $src$$.r + $src$$.c].piece, $board$$[8 * $dst$$17_prevLiveStore$$.r + $dst$$17_prevLiveStore$$.c].piece.timesMoved++, $dstPiece$$ = $board$$[8 * $src$$.r + $src$$.c].piece = null) : ($board$$[$dstPos_history$$].piece = $board$$[$srcPos$$].piece, $board$$[$dstPos_history$$].piece.timesMoved++, $board$$[$srcPos$$].piece = 
+    null);
   }
-  $dstPos_history$$ = $prevLiveStore$$.liveHistory;
-  $dstPos_history$$.push({src:$src$$, dst:$dst$$, srcPiece:$srcPiece$$, dstPiece:$dstPiece$$, move:$dstPos_history$$.length});
-  $prevLiveStore$$ = Object.assign({}, $prevLiveStore$$);
-  $prevLiveStore$$.prevLiveStore = void 0;
+  $dstPos_history$$ = $store$$.liveHistory;
+  $dstPos_history$$.push({src:$src$$, dst:$dst$$17_prevLiveStore$$, srcPiece:$srcPiece$$, dstPiece:$dstPiece$$, move:$dstPos_history$$.length});
+  $dst$$17_prevLiveStore$$ = Object.assign({}, $store$$);
+  $dst$$17_prevLiveStore$$.prevLiveStore = void 0;
   $playerTurn$$ = $playerTurn$$ == module$src$box.WHITE_PLAYER ? module$src$box.BLACK_PLAYER : module$src$box.WHITE_PLAYER;
-  this.setLocalStorage($board$$, $playerTurn$$, $captures$$, $dstPos_history$$, [], $prevLiveStore$$);
-  this.promoteIfPossible($src$$, $dst$$);
+  this.setLocalStorage($board$$, $playerTurn$$, $captures$$, $dstPos_history$$, [], $dst$$17_prevLiveStore$$);
+  this.canPromote($src$$) && console.log("Promotion possible in Store movePiece");
 };
 Store$$module$src$store.prototype.selectBox = function $Store$$module$src$store$$selectBox$($pos$$) {
   var $boxes$$ = this.getLocalStorage().liveBoard;
@@ -497,10 +498,10 @@ Store$$module$src$store.prototype.canPromote = function $Store$$module$src$store
   return null != $board$$ && -1 != $board$$.title.indexOf("pawn") && (0 == $pawn$$.r && 0 == $board$$.title.indexOf("white") || 7 == $pawn$$.r && 0 == $board$$.title.indexOf("black")) && $hItem_history$$.dst.r == $pawn$$.r && $hItem_history$$.dst.c == $pawn$$.c ? !0 : !1;
 };
 Store$$module$src$store.prototype.promoteIfPossible = function $Store$$module$src$store$$promoteIfPossible$($pawn$$, $other$$, $otherPieceIn$$) {
-  var $board$$ = this.getLocalStorage().liveBoard, $history$$ = this.getLocalStorage().liveHistory, $hItem$$ = $history$$[$history$$.length - 1], $pawnPiece$$ = $board$$[8 * $pawn$$.r + $pawn$$.c].piece;
+  var $board$$ = this.getLocalStorage().liveBoard, $history$$ = this.getLocalStorage().liveHistory, $player$$ = this.getLocalStorage().livePlayer, $hItem$$ = $history$$[$history$$.length - 1], $pawnPiece$$ = $board$$[8 * $pawn$$.r + $pawn$$.c].piece;
   $other$$ = $otherPieceIn$$ || $board$$[8 * $other$$.r + $other$$.c].piece;
-  return null != $pawnPiece$$ && -1 != $pawnPiece$$.title.indexOf("pawn") && null != $other$$ && $pawnPiece$$.title.indexOf("white") == $other$$.title.indexOf("white") && (0 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("white") || 7 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("black")) && $hItem$$.dst.r == $pawn$$.r && $hItem$$.dst.c == $pawn$$.c ? ($board$$[8 * $pawn$$.r + $pawn$$.c].piece.title = $other$$.title, $history$$.push({src:$pawn$$, dst:$pawn$$, srcPiece:$pawnPiece$$, dstPiece:$pawnPiece$$, 
-  move:$hItem$$.move}), this.setLocalStorage($board$$, void 0, void 0, $history$$), !0) : !1;
+  return null != $pawnPiece$$ && -1 != $pawnPiece$$.title.indexOf("pawn") && null != $other$$ && $pawnPiece$$.title.indexOf("white") == $other$$.title.indexOf("white") && (0 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("white") || 7 == $pawn$$.r && 0 == $pawnPiece$$.title.indexOf("black")) && $hItem$$.dst.r == $pawn$$.r && $hItem$$.dst.c == $pawn$$.c && -1 == $other$$.title.indexOf("pawn") && -1 == $other$$.title.indexOf("king") ? ($board$$[8 * $pawn$$.r + $pawn$$.c].piece.title = $other$$.title, 
+  $history$$.push({src:$pawn$$, dst:$pawn$$, srcPiece:$pawnPiece$$, dstPiece:$pawnPiece$$, move:$hItem$$.move}), $player$$ = $player$$ == module$src$box.WHITE_PLAYER ? module$src$box.BLACK_PLAYER : module$src$box.WHITE_PLAYER, this.setLocalStorage($board$$, $player$$, void 0, $history$$), !0) : !1;
 };
 Store$$module$src$store.prototype.undoMove = function $Store$$module$src$store$$undoMove$() {
 };
@@ -641,12 +642,12 @@ Controller$$module$src$controller.prototype.selectBox = function $Controller$$mo
   this._lastSelectedBox = this._selectedBox;
   this._selectedBox = deserializeBoxContents$$module$src$controller($box$$11_locationIfCanMove_possibleMoves$$);
   this.store.selectBox(this._selectedBox.pos);
-  this._lastSelectedBox.pos != this._selectedBox.pos && ($box$$11_locationIfCanMove_possibleMoves$$ = !1, null != this._lastSelectedBox.piece && ($box$$11_locationIfCanMove_possibleMoves$$ = this.store.locationIfCanMove(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox))), null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && null != this._selectedBox.piece && null != this._selectedBox.piece.title && 
-  this.store.promoteIfPossible({r:this._lastSelectedBox.r, c:this._lastSelectedBox.c}, {r:this._selectedBox.r, c:this._selectedBox.c}) || null != this._selectedCapturedPiece && null != this._selectedCapturedPiece.title && null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && this.store.promoteIfPossible({r:this._lastSelectedBox.r, c:this._lastSelectedBox.c}, void 0, this._selectedCapturedPiece) ? (-1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), 
-  -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedBox = module$src$box.emptyBox(-1)) : null != this._lastSelectedBox.piece && 0 != $box$$11_locationIfCanMove_possibleMoves$$ ? (this.store.movePiece(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.unselectBox(this._lastSelectedBox.pos), 
-  this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, c:this._selectedBox.c}) && alert("Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion."), this.store.unselectBox(this._selectedBox.pos), this._selectedBox = module$src$box.emptyBox(-1)) : null != this._selectedBox.piece ? (this.store.updatePossibleMoves(null), $box$$11_locationIfCanMove_possibleMoves$$ = 
-  this.store.getPossibleMoves(extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.updatePossibleMoves($box$$11_locationIfCanMove_possibleMoves$$), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1)) : (this.store.updatePossibleMoves(null), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, 
-  c:this._selectedBox.c}) && alert("Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion."), -1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), this._selectedBox = module$src$box.emptyBox(-1)), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
+  this._lastSelectedBox.pos != this._selectedBox.pos && ($box$$11_locationIfCanMove_possibleMoves$$ = !1, null != this._lastSelectedBox.piece && ($box$$11_locationIfCanMove_possibleMoves$$ = this.store.locationIfCanMove(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), extractLocationFromBox$$module$src$controller(this._selectedBox))), null != this._lastSelectedBox.piece && 0 != $box$$11_locationIfCanMove_possibleMoves$$ ? (this.store.movePiece(extractLocationFromBox$$module$src$controller(this._lastSelectedBox), 
+  extractLocationFromBox$$module$src$controller(this._selectedBox)), this.store.unselectBox(this._lastSelectedBox.pos), this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, c:this._selectedBox.c}) && alert("Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion."), this.store.unselectBox(this._selectedBox.pos), this._selectedBox = module$src$box.emptyBox(-1)) : 
+  null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && null != this._selectedBox.piece && null != this._selectedBox.piece.title && this.store.promoteIfPossible({r:this._lastSelectedBox.r, c:this._lastSelectedBox.c}, {r:this._selectedBox.r, c:this._selectedBox.c}) || null != this._selectedCapturedPiece && null != this._selectedCapturedPiece.title && null != this._lastSelectedBox.piece && null != this._lastSelectedBox.piece.title && this.store.promoteIfPossible({r:this._lastSelectedBox.r, 
+  c:this._lastSelectedBox.c}, void 0, this._selectedCapturedPiece) ? (-1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this.store.updatePossibleMoves(null), this._lastSelectedBox = module$src$box.emptyBox(-1), this._selectedBox = module$src$box.emptyBox(-1)) : null != this._selectedBox.piece ? (this.store.updatePossibleMoves(null), $box$$11_locationIfCanMove_possibleMoves$$ = this.store.getPossibleMoves(extractLocationFromBox$$module$src$controller(this._selectedBox)), 
+  this.store.updatePossibleMoves($box$$11_locationIfCanMove_possibleMoves$$), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1)) : (this.store.updatePossibleMoves(null), -1 != this._lastSelectedBox.pos && this.store.unselectBox(this._lastSelectedBox.pos), this._lastSelectedBox = module$src$box.emptyBox(-1), this.store.canPromote({r:this._selectedBox.r, c:this._selectedBox.c}), -1 != this._selectedBox.pos && this.store.unselectBox(this._selectedBox.pos), 
+  this._selectedBox = module$src$box.emptyBox(-1)), -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx), this.showAndBindCapturedPieces(), this.showBoardAndBindBoxes());
 };
 Controller$$module$src$controller.prototype.selectCapturedPiece = function $Controller$$module$src$controller$$selectCapturedPiece$($pieceElem$$, $i$$) {
   -1 != this._selectedCapturedPiece.capturedIdx && this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);

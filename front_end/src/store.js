@@ -351,7 +351,12 @@ export default class Store {
         if (playerTurn == WHITE_PLAYER) playerTurn = BLACK_PLAYER;
         else playerTurn = WHITE_PLAYER;
         this.setLocalStorage(board, playerTurn, captures, history, [], prevLiveStore);
-        this.promoteIfPossible(src,dst);
+        if (this.canPromote(src)) {
+            console.log('Promotion possible in Store movePiece');
+            // let {board, playerTurn, captures, history, redoHistory, prevLiveStore} = this.getLocalStorage();
+            // playerTurn = playerTurn == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
+            // this.setLocalStorage(board, playerTurn, captures, history, redoHistory, prevLiveStore);
+        }
     }
 
     /**
@@ -484,6 +489,7 @@ export default class Store {
     promoteIfPossible(pawn, other, otherPieceIn) {
         let board = this.getLocalStorage().liveBoard;
         let history = this.getLocalStorage().liveHistory;
+        let player = this.getLocalStorage().livePlayer;
         let hItem = history[history.length-1];
         const pawnPiece = board[pawn.r*8+pawn.c].piece;
         const otherPiece = otherPieceIn || board[other.r*8+other.c].piece;
@@ -491,11 +497,14 @@ export default class Store {
             && otherPiece != null && pawnPiece.title.indexOf('white') == otherPiece.title.indexOf('white')
             && ((pawn.r == 0 && pawnPiece.title.indexOf('white') == 0) || (pawn.r == 7 && pawnPiece.title.indexOf('black') == 0))
             && hItem.dst.r == pawn.r && hItem.dst.c == pawn.c
+            && otherPiece.title.indexOf('pawn') == -1
+            && otherPiece.title.indexOf('king') == -1
         ) {
             board[pawn.r*8+pawn.c].piece.title = otherPiece.title;
             const m = hItem.move;
             history.push({src: pawn, dst: pawn, srcPiece: pawnPiece, dstPiece: pawnPiece, move: m});
-            this.setLocalStorage(board,undefined,undefined,history);
+            player = player == WHITE_PLAYER ? BLACK_PLAYER : WHITE_PLAYER;
+            this.setLocalStorage(board,player,undefined,history);
             return true;
         }
         return false;

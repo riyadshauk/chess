@@ -1,8 +1,10 @@
-import {Piece, emptyPiece} from './piece';
+import {Piece, Box} from './piece';
 import {PieceHelper} from './piecehelper';
 
-export default class King {
-  constructor(specialMoves) {
+export default class King implements Piece {
+  public name: string;
+  public getPossibleSpecialMoves?: Function; // @todo implement this in model (extract from front-end logic)
+  constructor(specialMoves?) {
     this.name = 'king';
     this.getPossibleSpecialMoves = specialMoves;
   }

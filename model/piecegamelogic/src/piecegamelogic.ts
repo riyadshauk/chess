@@ -1,6 +1,6 @@
-import {Box} from '../../box';
+import 'path';
 import {GameState, initialGameState} from '../../gamestate';
-import {Piece, emptyPiece} from '../../piece/src/piece';
+import {Box, Piece, EmptyPiece} from '../../piece/src/piece';
 import {PieceHelper} from '../../piece/src/piecehelper';
 import Pawn from '../../piece/src/pawn';
 import Rook from '../../piece/src/rook';
@@ -8,18 +8,30 @@ import Knight from '../../piece/src/knight';
 import Bishop from '../../piece/src/bishop';
 import Queen from '../../piece/src/queen';
 import King from '../../piece/src/king';
-let PieceGameLogic = {};
+const PieceGameLogic = { // for TypeScript
+  getType: (s: string) => new EmptyPiece,
+  getNumMoves: (s: string) => -1,
+  getPossibleMoves: (gameState, src: Box) => [{r: -1, c: -1}],
+  isPossibleToMoveTo: (gameState, src: Box) => (Box) => false,
+  isInCheck: (gameState, src: Box) => false,
+  isInCheckmate: (gameState, src: Box) => false,
+  kingCanCastleWithGivenRook: (gameState, src: Box, dst: Box) => false,
+  castleKingWithGivenRook: (gameState, src: Box, dst: Box) => false,
+  getSetOfAllPossibleMovesForPlayer: (gameState, player: number) => new Set(),
+  randomDefensiveMove: (gameState) => new Set(),
+  isACapture: (gameState, src: Box, dst: Box) => false,
+};
 /**
  * 
  * @param {string} s 
  * @returns {Piece}
  */
-PieceGameLogic.getType = s => {
-  if (s.trim() === '') return emptyPiece;
+PieceGameLogic.getType = (s: string) => {
+  if (s.trim() === '') return new EmptyPiece;
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
   let numMoves = codeMatch && codeMatch.length > 2 ? codeMatch[2] : null;
   let alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
-  if (!numMoves || !alphacode) return emptyPiece;
+  if (!numMoves || !alphacode) return new EmptyPiece;
   switch (alphacode.toLowerCase().trim()) {
     case 'p':
       return new Pawn;
@@ -35,9 +47,9 @@ PieceGameLogic.getType = s => {
       const king = new King(PieceGameLogic.kingCanCastleWithGivenRook);
       return king;
     case '':
-      return emptyPiece;
+      return new EmptyPiece;
     default:
-      return emptyPiece;
+      return new EmptyPiece;
     }
 }
 /**
@@ -48,7 +60,7 @@ PieceGameLogic.getType = s => {
  */
 PieceGameLogic.getNumMoves = s => {
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
-  let numMoves = codeMatch && codeMatch.length > 2 && !isNaN(codeMatch[2]) ? Number(codeMatch[2]) : -1; // -1 should never happen, though.
+  let numMoves = codeMatch && codeMatch.length > 2 && !Number.isNaN(Number(codeMatch[2])) ? Number(codeMatch[2]) : -1; // -1 should never happen, though.
   return numMoves;
 }
 /**
@@ -79,11 +91,11 @@ PieceGameLogic.getPossibleMoves = (gameState,src) => {
  * @param {Box} src
  * @returns {Function: boolean}
  */
-PieceGameLogic.isPossibleToMoveTo = (gameState,src) => {
+PieceGameLogic.isPossibleToMoveTo = (gameState, src) => {
   const s = gameState.board[src.r][src.c];
   const numMoves = PieceGameLogic.getNumMoves(s);
   const PieceType = PieceGameLogic.getType(s);
-  const isPossibleToMoveTo = PieceType.getPossibleMoves(gameState,src);
+  const isPossibleToMoveTo = PieceType.getPossibleMoves(gameState, src);
   return isPossibleToMoveTo;
 }
 /**
@@ -130,7 +142,7 @@ PieceGameLogic.isInCheckmate = (gameState,src) => {
 PieceGameLogic.kingCanCastleWithGivenRook = (gameState,src,dst) => {
   const s = gameState.board[src.r][src.c];
   const t = gameState.board[dst.r][dst.c];
-  if (PieceGameLogic.getType(s).name != (new King()).name || PieceGameLogic.getType(t).name != (new Rook).name || PieceGameLogic.getNumMoves(s) != 0 || PieceGameLogic.getNumMoves(t) != 0) return false;
+  if (PieceGameLogic.getType(s).name != (new King(/* @todo pass in functionality? */)).name || PieceGameLogic.getType(t).name != (new Rook).name || PieceGameLogic.getNumMoves(s) != 0 || PieceGameLogic.getNumMoves(t) != 0) return false;
   if (PieceHelper.isPieceOfCurrentPlayer(gameState,src) && PieceHelper.isPieceOfCurrentPlayer(gameState,dst) && PieceHelper.isBoxOnBoard(gameState,dst) && src != dst) {
     let dir = dst.c - src.c > 0 ? 1 : -1;
     let len = Math.abs(dst.c-src.c);

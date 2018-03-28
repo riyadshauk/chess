@@ -1,7 +1,18 @@
-import {emptyPieceHelper} from './piece';
+import {Piece, Box} from './piece';
 import {GameState} from '../../gamestate';
-import {Box} from '../../box';
-let PieceHelper = emptyPieceHelper;
+// import {Box} from '../../box';
+const PieceHelper = {
+  getNumMoves: (gameState, box: Box) => -1,
+  isEmpty: (gameState, box: Box) => false,
+  isPieceOfGivenPlayer: (gameState, player: number, box: Box) => false,
+  isPieceOfCurrentPlayer: (gameState, box: Box) => false, 
+  isBoxOnBoard: (gameState, box: Box) => false, 
+  isValidSourceAndDest: (gameState, src: Box, dst: Box) => false, 
+  canGoAlongRowToDest: (gameState, src: Box, dst: Box) => false, 
+  canGoAlongColToDest: (gameState, src: Box, dst: Box) => false, 
+  canGoAlongLineToDest: (gameState, src: Box, dst: Box) => false, 
+  canGoAlongDiagonalToDest: (gameState, src: Box, dst: Box) => false, 
+};
 /**
  * @param {GameState} gameState
  * @param {Box} box
@@ -22,7 +33,7 @@ PieceHelper.getNumMoves = (gameState,box) => {
  * @returns {boolean}
  * @todo Parameter destructuring not yet supported by Google Closure compiler. Check for updates: https://github.com/google/closure-compiler/issues/1781 and revise if updated.
  */
-PieceHelper.isEmpty = (gameState,box) => {
+PieceHelper.isEmpty = (gameState,box): boolean => {
   const {c: c, r: r} = box;
   return gameState.board[r][c].trim() === '';
 }

@@ -1,11 +1,12 @@
-import {Piece, emptyPiece} from './piece';
+import {Piece, Box} from './piece';
 import {PieceHelper} from './piecehelper';
 
-export default class Pawn {
+export default class Pawn implements Piece {
+  public name: string;
   constructor() {
     this.name = 'pawn';
   }
-  getPossibleMoves(gameState,src,numMoves) {
+  getPossibleMoves(gameState,src,numMoves?) {
     if (numMoves === undefined) numMoves = PieceHelper.getNumMoves(gameState,src);
     const forwardDirectionOfCurrentPlayer = () => gameState.player == gameState.playerWhite ? -1 : 1;
     /**

@@ -1,7 +1,8 @@
-import {Piece, emptyPiece} from './piece';
+import {Piece, Box} from './piece';
 import {PieceHelper} from './piecehelper';
 
-export default class Knight {
+export default class Knight implements Piece {
+  public name: string;
   constructor() {
     this.name = 'knight';
   }
