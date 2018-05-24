@@ -1,11 +1,11 @@
 const path = require('path');
 // https://webpack.js.org/guides/typescript/
 module.exports = {
-  entry: path.resolve('./front_end/src/app.ts'),
+  entry: path.resolve('./src/app.ts'),
   devtool: 'inline-source-map',
   output: {
-    filename: 'wp_bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    filename: './dist/bundle.js',
+    path: path.resolve(__dirname, 'public')
   },
   module: {
     rules: [

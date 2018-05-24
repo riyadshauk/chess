@@ -1,8 +1,0 @@
-{
-    "dependencies": {
-        "assert": "^1.4.1"
-    },
-    "devDependencies": {
-        "babel-cli": "^6.26.0"
-    }
-}
