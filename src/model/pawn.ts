@@ -3,9 +3,11 @@ import {PieceHelper} from './piecehelper';
 
 export default class Pawn implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
-  constructor() {
+  constructor(color: string) {
     this.name = 'pawn';
+    this.color = color;
     this.getPossibleMoves = (gameState,src: Box,numMoves?: number) => {
       if (numMoves === undefined) numMoves = PieceHelper.getNumMoves(gameState,src);
       const forwardDirectionOfCurrentPlayer = () => gameState.player == gameState.playerWhite ? -1 : 1;

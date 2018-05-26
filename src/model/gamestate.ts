@@ -3,14 +3,16 @@ import { Box } from './piece';
 /**
  * @typedef {{board: Array<Array<string>>, numRows: number, numCols: number, playerWhite: number, playerBlack: number, player: number}}
  */
-export var GameState;
+export interface GameState {
+  board: Array<Array<string>>, numRows: number, numCols: number, playerWhite: number, playerBlack: number, player: number, getEncoding: ((box: Box) => string);
+};
 
 /**
  * @function
  * @returns {GameState}
  */
-export function initialGameState() {
-  return {
+export function initialGameState(): GameState {
+  const gameState = {
     board: [
       ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
       ['p0','p0','p0','p0','p0','p0','p0','p0'],
@@ -24,6 +26,8 @@ export function initialGameState() {
     numCols: 8, 
     playerWhite: 0, 
     playerBlack: 1, 
-    player: 0
+    player: 0,
+    getEncoding: (box: Box): string => (gameState.board[box.r][box.c]),
   };
+  return gameState;
 }

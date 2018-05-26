@@ -1,3 +1,5 @@
+import { GameState } from './gamestate';
+
 export interface Box {
   r: number;
   c: number;
@@ -5,15 +7,18 @@ export interface Box {
 
 export interface Piece {
   name: string;
-  getPossibleMoves: (gameState, src: Box, numMoves?: number) => (dst: Box) => boolean;
+  color: string;
+  getPossibleMoves: (gameState: GameState, src: Box, numMoves?: number) => (dst: Box) => boolean;
 }
 
 export class EmptyPiece implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
-  constructor() {
+  constructor(color = 'blank') {
     this.name = 'empty';
-    this.getPossibleMoves = (gameState, src: Box, numMoves?: number) => {
+    this.color = color;
+    this.getPossibleMoves = (gameState: GameState, src: Box, numMoves?: number) => {
       const isPossibleToMoveTo = (dst: Box) => false;
       return isPossibleToMoveTo;
     }

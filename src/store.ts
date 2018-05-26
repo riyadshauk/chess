@@ -1,18 +1,7 @@
 import {Board, Location, Box, emptyBox, Piece, initializePiece, Player, WHITE_PLAYER, BLACK_PLAYER} from './types';
-import {PieceGameLogic} from './model/piecegamelogic';
-
-/**
- * This is the GameState interface that I decided to use in model
- * @todo refactor this interface so it doesn't have a board that is Array<string>. eg use OOP.
- */
-interface GameState { // @todo move out to some model-level interface with front-end?
-    board: Array<string>;
-    numRows: number;
-    numCols: number;
-    playerWhite: Player;
-    playerBlack: Player;
-    player: Player;
-};
+import { PieceGameLogic } from './model/piecegamelogic';
+import { GameState as ModelGameState } from './model/gamestate';
+import { Box as ModelBox } from './model/piece';
 
 export default class Store {
     private liveStore = {
@@ -246,7 +235,7 @@ export default class Store {
      * @param {Board=} boardIn
      * @returns {!Object<Array<string>>}
      */
-    convertBoardToGameState(boardIn?: Board): GameState {
+    convertBoardToGameState(boardIn?: Board): ModelGameState {
         /**
          * @type {Board}
          */
@@ -258,6 +247,7 @@ export default class Store {
             playerWhite: 0,
             playerBlack: 1,
             player: this.getLocalStorage().livePlayer,
+            getEncoding: (box: Box): string => (gameState.board[box.r][box.c]),
         };
         for (let i = 0; i < gameState.board.length; i++) {
             gameState.board[i] = [];
@@ -306,12 +296,12 @@ export default class Store {
 
     /**
      * 
-     * @param {GameState} gameState 
+     * @param {ModelGameState} gameState 
      * @param {Location} src 
      * @param {Location} dst 
      * @return {(Location|boolean)} Location of piece that would be captured
      */
-    locationIfIsCapture(gameState: GameState, src: Location, dst: Location): Location | boolean {
+    locationIfIsCapture(gameState: ModelGameState, src: Location, dst: Location): Location | boolean {
         const possibleEnPassantLocation = this.getEnPassantLocationIfPossible(src);
         let forwardDir = 0;
         if (possibleEnPassantLocation && possibleEnPassantLocation.move.c == dst.c && possibleEnPassantLocation.move.r == dst.r) {

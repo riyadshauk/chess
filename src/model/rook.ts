@@ -3,9 +3,11 @@ import {PieceHelper} from './piecehelper';
 
 export default class Rook implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
-  constructor() {
+  constructor(color: string) {
     this.name = 'rook';
+    this.color = color;
     this.getPossibleMoves = (gameState,src: Box,numMoves?: number) => {
       const isPossibleToMoveTo = dst =>
         PieceHelper.isValidSourceAndDest(gameState,src,dst) ?

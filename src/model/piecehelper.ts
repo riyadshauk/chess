@@ -1,11 +1,11 @@
 import {Piece, Box} from './piece';
-import {GameState} from './gamestate';
+import { GameState } from './gamestate';
 // import {Box} from '../../box';
 const PieceHelper = {
   getNumMoves: (gameState, box: Box) => -1,
   isEmpty: (gameState, box: Box) => false,
   isPieceOfGivenPlayer: (gameState, player: number, box: Box) => false,
-  isPieceOfCurrentPlayer: (gameState, box: Box) => false, 
+  isPieceOfCurrentPlayer: (gameState: GameState, box: Box) => false, 
   isBoxOnBoard: (gameState, box: Box) => false, 
   isValidSourceAndDest: (gameState, src: Box, dst: Box) => false, 
   canGoAlongRowToDest: (gameState, src: Box, dst: Box) => false, 
@@ -44,7 +44,7 @@ PieceHelper.isEmpty = (gameState,box): boolean => {
  * @param {Box} box
  * @returns {boolean}
  */
-PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
+PieceHelper.isPieceOfGivenPlayer = (gameState,player,box): boolean => {
   const s = gameState.board[box.r][box.c];
   let codeMatch = s.match(/([a-zA-z])(\d*)/);
   let alphacode = codeMatch.length > 1 ? codeMatch[1] : null;
@@ -52,16 +52,10 @@ PieceHelper.isPieceOfGivenPlayer = (gameState,player,box) => {
   if ((player == 0 && alphacode == alphacode.toUpperCase()) || (player == 1 && alphacode == alphacode.toLowerCase())) return true;
   return false;
 }
-/**
- * 
- * @param {GameState} gameState 
- * @param {Box} box 
- * @returns {boolean}
- */
-PieceHelper.isPieceOfCurrentPlayer = (gameState,box) => {
+PieceHelper.isPieceOfCurrentPlayer = (gameState: GameState, box: Box): boolean => {
   const checkParticularPlayer = (playerCase,{c: c, r: r} = box) =>
-    (gameState.board[r][c] == playerCase.apply(gameState.board[r][c])) && !PieceHelper.isEmpty(gameState,box);
-  return gameState.player == gameState.playerWhite ?
+    (gameState.board[r][c] === playerCase.apply(gameState.board[r][c])) && !PieceHelper.isEmpty(gameState,box);
+  return gameState.player === gameState.playerWhite ?
     checkParticularPlayer(String.prototype.toUpperCase) : checkParticularPlayer(String.prototype.toLowerCase);
 }
 /**

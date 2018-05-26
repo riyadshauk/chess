@@ -3,10 +3,12 @@ import {PieceHelper} from './piecehelper';
 
 export default class King implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
   public getPossibleSpecialMoves: Function;
-  constructor(specialMoves?) {
+  constructor(color: string, specialMoves?) {
     this.name = 'king';
+    this.color = color;
     this.getPossibleSpecialMoves = specialMoves;
     this.getPossibleMoves = (gameState,src: Box,numMoves?: number) => {
       const isPossibleToMoveTo = dst => {

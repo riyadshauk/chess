@@ -7,9 +7,11 @@ import {PieceHelper} from './piecehelper';
  */
 export default class Queen implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
-  constructor() {
+  constructor(color: string) {
     this.name = 'queen';
+    this.color = color;
     this.getPossibleMoves = (gameState,src: Box,numMoves?: number) => {
       const isPossibleToMoveTo = dst =>
         PieceHelper.isValidSourceAndDest(gameState,src,dst) ?

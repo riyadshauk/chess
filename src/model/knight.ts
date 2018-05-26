@@ -3,9 +3,11 @@ import {PieceHelper} from './piecehelper';
 
 export default class Knight implements Piece {
   public name: string;
+  public color: string;
   public getPossibleMoves;
-  constructor() {
+  constructor(color: string) {
     this.name = 'knight';
+    this.color = color;
     this.getPossibleMoves = (gameState,src,numMoves) => {
       const isPossibleToMoveTo = dst =>
         PieceHelper.isValidSourceAndDest(gameState,src,dst) &&
