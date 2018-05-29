@@ -1,10 +1,10 @@
-import { Piece, Box, EmptyPiece } from './piece';
+import { Box, Piece, GameState } from '../types';
 import { PieceHelper } from './piecehelper';
 
 export default class Bishop implements Piece {
   public name: string;
   public color: string;
-  public getPossibleMoves;
+  public getPossibleMoves: (gameState: GameState, src: Box, numMoves?: number) => (dst: Box) => boolean;
   constructor(color: string) {
     this.name = 'bishop';
     this.color = color;

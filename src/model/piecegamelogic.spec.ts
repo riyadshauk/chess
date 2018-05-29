@@ -1,6 +1,5 @@
-import { initialGameState, GameState } from './gamestate';
+import { Box, Piece, EmptyPiece, GameState, PLAYER_BLACK, Board } from '../types';
 import { PieceGameLogic } from './piecegamelogic';
-import { Piece, Box, EmptyPiece } from './piece';
 import { expect } from 'chai';
 import 'mocha';
 import Knight from './knight';
@@ -62,11 +61,17 @@ describe('PieceGameLogic Test Suite', () => {
     it('testMakeLegalMoveBlackCaptureNotTurn', () => testMakeLegalMoveBlackCaptureNotTurn());
     it('testMakeLegalMoveBlackCaptureBlacksTurn', () => testMakeLegalMoveBlackCaptureBlacksTurn());
   });
+  /**
+   * @todo
+   */
+  describe('Ensure this module has no side effects', () => {
+    // @todo test makeLegalMove, makeEnPassant, castling here
+    it('should work', () => testPGLHasNoSideEffects1());
+  });
 });
 
 const testKingCanCastleRookWhenNeitherHaveMoved = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -75,6 +80,7 @@ const testKingCanCastleRookWhenNeitherHaveMoved = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0',' ',' ','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
   const canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
@@ -82,8 +88,7 @@ const testKingCanCastleRookWhenNeitherHaveMoved = () => {
 };
 
 const testKingCannotCastleRookWhenOneHasMoved = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -92,6 +97,7 @@ const testKingCannotCastleRookWhenOneHasMoved = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','k1',' ',' ','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
   const canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
@@ -99,8 +105,7 @@ const testKingCannotCastleRookWhenOneHasMoved = () => {
 };
 
 const testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -109,6 +114,7 @@ const testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0',' ',' ',' ','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:7,c:4};
   const dst = {r:7,c:0};
   const canCastle = PieceGameLogic.kingCanCastleWithGivenRook(gameState,src,dst);
@@ -116,8 +122,7 @@ const testKingCanCastleRookFromOtherSideWhenNeitherHaveMoved = () => {
 };
 
 const testIsInCheck = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -126,14 +131,14 @@ const testIsInCheck = () => {
     [' ','h0',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:5,c:1};
   const isInCheck = PieceGameLogic.isInCheck(gameState,src);
   expect(isInCheck).to.equal(true);
 };
 
 const testIsNotInCheck = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -142,14 +147,14 @@ const testIsNotInCheck = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:4,c:1};
   const isInCheck = PieceGameLogic.isInCheck(gameState,src);
   expect(isInCheck).to.equal(false);
 };
 
 const testIsInCheckmate = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0',' ','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -158,14 +163,14 @@ const testIsInCheckmate = () => {
     [' ','p0',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:5,c:1};
   const isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
   expect(isInCheckmate).to.equal(true);
 };
 
 const testIsNotInCheckmate = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -174,6 +179,7 @@ const testIsNotInCheckmate = () => {
     [' ','h0',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:5,c:1};
   gameState.player = 1;
   const isInCheckmate = PieceGameLogic.isInCheckmate(gameState,src);
@@ -181,8 +187,7 @@ const testIsNotInCheckmate = () => {
 };
 
 const testIsCapture = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -191,7 +196,8 @@ const testIsCapture = () => {
     [' ','h1',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-  gameState.player = gameState.playerBlack;
+  const gameState = new GameState(board);
+  gameState.player = PLAYER_BLACK;
   const src = {r:5,c:1};
   const dst = {r:7,c:2};
   const isCapture = PieceGameLogic.isACapture(gameState,src,dst);
@@ -199,8 +205,7 @@ const testIsCapture = () => {
 };
 
 const testInvalidCaptureIsNotCapture = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -209,6 +214,7 @@ const testInvalidCaptureIsNotCapture = () => {
     [' ','h0',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:5,c:1};
   const dst = {r:7,c:5};
   const isCapture = PieceGameLogic.isACapture(gameState,src,dst);
@@ -216,8 +222,7 @@ const testInvalidCaptureIsNotCapture = () => {
 };
 
 const testCastlingIsNotCapture = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -226,6 +231,7 @@ const testCastlingIsNotCapture = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0',' ',' ','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:7,c:4};
   const dst = {r:7,c:7};
   const isCapture = PieceGameLogic.isACapture(gameState,src,dst);
@@ -233,8 +239,7 @@ const testCastlingIsNotCapture = () => {
 };
 
 const testValidNonCaptureIsNotCapture = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0',' ','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -243,6 +248,7 @@ const testValidNonCaptureIsNotCapture = () => {
     [' ','h0',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:6,c:3};
   const dst = {r:4,c:3};
   const isCapture = PieceGameLogic.isACapture(gameState,src,dst);
@@ -250,8 +256,7 @@ const testValidNonCaptureIsNotCapture = () => {
 };
 
 const testPawnCannotEnPassantWhenCorrectTurn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -260,6 +265,7 @@ const testPawnCannotEnPassantWhenCorrectTurn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:4,c:6};
   const prevMove = { src: { r: 1, c: 3 }, dst: { r: 3, c: 3 } };
   const possible = PieceGameLogic.isEnPassantPossible(gameState, src, prevMove);
@@ -267,8 +273,7 @@ const testPawnCannotEnPassantWhenCorrectTurn = () => {
 };
 
 const testPawnCanEnPassantWhenCorrectTurn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -277,6 +282,7 @@ const testPawnCanEnPassantWhenCorrectTurn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:3,c:6};
   const prevMove = { src: { r: 1, c: 7 }, dst: { r: 3, c: 7 } };
   const possible = PieceGameLogic.isEnPassantPossible(gameState, src, prevMove);
@@ -284,8 +290,7 @@ const testPawnCanEnPassantWhenCorrectTurn = () => {
 };
 
 const testPawnCannotEnPassantWhenPrevDstIsSrc = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -294,6 +299,7 @@ const testPawnCannotEnPassantWhenPrevDstIsSrc = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = {r:3,c:6};
   const prevMove = { src: { r: 4, c: 6 }, dst: { r: 3, c: 6 } };
   const possible = PieceGameLogic.isEnPassantPossible(gameState, src, prevMove);
@@ -301,8 +307,7 @@ const testPawnCannotEnPassantWhenPrevDstIsSrc = () => {
 };
 
 const testGetBoxOfPromotablePieceWhenNotPossible = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0',' ','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0','P2',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -311,13 +316,13 @@ const testGetBoxOfPromotablePieceWhenNotPossible = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const possibleBox = PieceGameLogic.getBoxOfPromotablePieceIfPossible(gameState);
   expect(possibleBox).to.equal(undefined);
 };
 
 const testGetBoxOfPromotablePieceWhenPossible = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','P2','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -326,6 +331,7 @@ const testGetBoxOfPromotablePieceWhenPossible = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const box = { r: 0, c: 6 };
   const possibleBox = PieceGameLogic.getBoxOfPromotablePieceIfPossible(gameState);
   expect(possibleBox.r).to.equal(box.r);
@@ -333,8 +339,7 @@ const testGetBoxOfPromotablePieceWhenPossible = () => {
 };
 
 const testPromoteIfPossibleWhenNotInCorrectPosition = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0',' ','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0','P2',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -343,14 +348,14 @@ const testPromoteIfPossibleWhenNotInCorrectPosition = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const box = { r: 1, c: 6 };
   const gs = PieceGameLogic.promoteIfPossible(gameState, box, (new Knight('white')));
   expect(PieceGameLogic.getType(gs.getEncoding(box)).name).to.equal('pawn');
 };
 
 const testPromoteIfPossibleWhenInCorrectPositionWithIncorrectColor = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','P2','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -359,14 +364,14 @@ const testPromoteIfPossibleWhenInCorrectPositionWithIncorrectColor = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const box = { r: 0, c: 6 };
   const gs = PieceGameLogic.promoteIfPossible(gameState, box, (new Knight('black')));
   expect(PieceGameLogic.getType(gs.getEncoding(box)).name).to.equal('pawn');
 };
 
 const testPromoteIfPossibleWhenInCorrectPositionWithCorrectColor = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','P2','r0'], // lower case: black pieces
     ['p0','p0',' ','p0','p0','p0',' ',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -375,14 +380,14 @@ const testPromoteIfPossibleWhenInCorrectPositionWithCorrectColor = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const box = { r: 0, c: 6 };
   const gs = PieceGameLogic.promoteIfPossible(gameState, box, (new Knight('white')));
   expect(PieceGameLogic.getType(gs.getEncoding(box)).name).to.equal('knight');
 };
 
 const testGetPossibleMovesStartingPawn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -391,6 +396,7 @@ const testGetPossibleMovesStartingPawn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 6, c: 5 };
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState, src);
   expect(Array.isArray(possibleMoves));
@@ -405,8 +411,7 @@ const testGetPossibleMovesStartingPawn = () => {
 };
 
 const testGetPossibleMovesWithCapture = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -415,6 +420,7 @@ const testGetPossibleMovesWithCapture = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 4, c: 6 };
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState, src);
   expect(Array.isArray(possibleMoves));
@@ -428,8 +434,7 @@ const testGetPossibleMovesWithCapture = () => {
 };
 
 const testGetPossibleMovesWithEnPassant = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -438,6 +443,7 @@ const testGetPossibleMovesWithEnPassant = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 3, c: 6 };
   const prevMove = { src: { r: 1, c: 7 }, dst: { r: 3, c: 7 } };
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState, src, prevMove);
@@ -452,8 +458,7 @@ const testGetPossibleMovesWithEnPassant = () => {
 };
 
 const testGetPossibleMovesWithCastling = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -462,6 +467,7 @@ const testGetPossibleMovesWithCastling = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0',' ',' ',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0',' ',' ','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 7, c: 4 };
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState, src);
   expect(Array.isArray(possibleMoves));
@@ -478,8 +484,7 @@ const testGetPossibleMovesWithCastling = () => {
 };
 
 const testMakeLegalMoveStartingPawn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -488,6 +493,7 @@ const testMakeLegalMoveStartingPawn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 6, c: 5 };
   const dst = { r: 4, c: 5 };
   const prevMove = { src: { r: 0, c: 0 }, dst: { r: 0, c: 0 } };
@@ -500,8 +506,7 @@ const testMakeLegalMoveStartingPawn = () => {
 };
 
 const testMakeLegalMoveEnPassant = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -510,6 +515,7 @@ const testMakeLegalMoveEnPassant = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 3, c: 6 };
   const dst = { r: 2, c: 7 };
   const prevMove = { src: { r: 1, c: 7 }, dst: { r: 3, c: 7 } };
@@ -524,8 +530,7 @@ const testMakeLegalMoveEnPassant = () => {
 };
 
 const testMakeLegalMoveBlackCaptureNotTurn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ','P2'],
@@ -534,6 +539,7 @@ const testMakeLegalMoveBlackCaptureNotTurn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 1, c: 6 };
   const dst = { r: 2, c: 7 };
   const prevMove = { src: { r: 3, c: 6 }, dst: { r: 2, c: 7 } };
@@ -542,8 +548,7 @@ const testMakeLegalMoveBlackCaptureNotTurn = () => {
 };
 
 const testMakeLegalMoveBlackCaptureBlacksTurn = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0',' '],
     [' ',' ',' ',' ',' ',' ',' ','P2'],
@@ -552,6 +557,7 @@ const testMakeLegalMoveBlackCaptureBlacksTurn = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
   const src = { r: 1, c: 6 };
   const dst = { r: 2, c: 7 };
   const prevMove = { src: { r: 3, c: 6 }, dst: { r: 2, c: 7 } };
@@ -563,4 +569,31 @@ const testMakeLegalMoveBlackCaptureBlacksTurn = () => {
   expect(PieceGameLogic.getType(ret.gameState.getEncoding(dst)) instanceof Pawn).to.be.true;
   expect(PieceGameLogic.getType(ret.gameState.getEncoding(dst)).color).to.equal('black');
   expect(ret.gameState.getEncoding(dst)).to.equal('p1');
+};
+
+const testPGLHasNoSideEffects1 = () => {
+  const board = [
+    ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
+    ['p0','p0','p0','p0','p0','p0','p0',' '],
+    [' ',' ',' ',' ',' ',' ',' ','P2'],
+    [' ',' ',' ',' ',' ',' ',' ',' '],
+    [' ',' ',' ',' ',' ',' ',' ',' '],
+    [' ',' ',' ',' ',' ',' ',' ',' '],
+    ['P0','P0','P0','P0','P0','P0',' ','P0'], // upper case: white pieces
+    ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
+  const gameState = new GameState(board);
+  const src = { r: 1, c: 6 };
+  const dst = { r: 2, c: 7 };
+  const prevMove = { src: { r: 3, c: 6 }, dst: { r: 2, c: 7 } };
+  gameState.player = 1;
+
+  const ret1 = PieceGameLogic.makeLegalMove(gameState, src, dst, prevMove);
+  const ret2 = PieceGameLogic.castleKingWithGivenRook(gameState,  src, dst);
+  const ret3 = PieceGameLogic.promoteIfPossible(gameState, src, PieceGameLogic.getType(gameState.getEncoding(dst)));
+  const ret4 = PieceGameLogic.makeLegalMove(gameState, src, dst, prevMove);
+
+  expect(gameState).to.not.equal(ret1.gameState);
+  expect(gameState).to.equal(ret2); // because King can't castle in this circumstance. @todo test the other branch.
+  expect(gameState).to.not.equal(ret3);
+  expect(gameState).to.not.equal(ret4);
 };

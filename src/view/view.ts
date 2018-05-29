@@ -1,78 +1,70 @@
-import { Board, Location, Box, Piece } from '../types';
+import { Board, Box, Piece, StoreState } from '../types';
 import { qs, $on } from './helpers';
 import Template from './template';
 
 export default class View {
-    private template: Template;
-    private $board: Element;
-    private $capturedwhite: Element;
-    private $capturedblack: Element;
-    private $main: Element;
-    private $undobtn: Element;
-    private $redobtn: Element;
-    /**
-     * @param {Template} template A Template instance
-     */
-    constructor(template: Template) {
-        this.template = template;
-        this.$board = qs('.chessboard');
-        this.$capturedwhite = qs('.capturedwhite');
-        this.$capturedblack = qs('.capturedblack');
-        this.$main = qs('.main');
-        this.$undobtn = qs('.undo');
-        this.$redobtn = qs('.redo');
+    private _template: Template;
+    private _$board: Element;
+    private _$capturedwhite: Element;
+    private _$capturedblack: Element;
+    private _$main: Element;
+    private _$undobtn: Element;
+    private _$redobtn: Element;
+
+    constructor() {
+        this._template = new Template;
+        this._$board = qs('.chessboard');
+        this._$capturedwhite = qs('.capturedwhite');
+        this._$capturedblack = qs('.capturedblack');
+        this._$main = qs('.main');
+        this._$undobtn = qs('.undo');
+        this._$redobtn = qs('.redo');
     }
 
-    public get$board() {
-        return this.$board;
+    public get $board() {
+        return this._$board;
     }
-    public get$capturedwhite() {
-        return this.$capturedwhite;
+    public get $capturedwhite() {
+        return this._$capturedwhite;
     }
-    public get$capturedblack() {
-        return this.$capturedblack;
+    public get $capturedblack() {
+        return this._$capturedblack;
     }
 
     /**
-     * Updates the chessboard html.
-     * @param {Board} board 
+     * @description Updates the chessboard html.
      */
-    showBoard(board: Board) {
-        this.$board.replaceChild(this.template.Board(board), this.$board.firstChild);
+    showBoard(state: StoreState): void {
+        this.$board.replaceChild(this._template.Board(state), this.$board.firstChild);
     }
 
     /**
-     * Updates the captured pieces in the html.
-     * @param {Array<Piece>} captures 
+     * @description Updates the captured pieces in the html.
      */
-    showCaptures(captures: Array<Piece>) {
-        this.$capturedwhite.replaceChild(this.template.CapturedWhite(captures), this.$capturedwhite.firstChild);
-        this.$capturedblack.replaceChild(this.template.CapturedBlack(captures), this.$capturedblack.firstChild);
+    showCaptures(state: StoreState): void {
+        this.$capturedwhite.replaceChild(this._template.CapturedWhite(state), this.$capturedwhite.firstChild);
+        this.$capturedblack.replaceChild(this._template.CapturedBlack(state), this.$capturedblack.firstChild);
     }
 
     /**
-     * Binds handler to box, calling handler when the synthetic 'click' event is fired.
-     * @param {Element} box 
-     * @param {Function} handler 
+     * @description Binds handler to box, calling handler when the synthetic 'click' event is fired.
      */
-    bindSelectBox(box: Element, handler: Function) {
-        $on(box, 'click', (({target}) => handler(box)));
+    bindSelectBox(box: Element, handler: (box: Element) => void): void {
+        $on(box, 'click', () => handler(box));
     }
 
     /**
-     * Binds handler to piece, calling handler when the synthetic 'click' event is fired.
-     * @param {Element} piece 
-     * @param {Function} handler 
+     * @description Binds handler to piece, calling handler when the synthetic 'click' event is fired.
      */
-    bindCapturedPiece(piece: Element, i: number, handler: Function) {
+    bindCapturedPiece(piece: Element, i: number, handler: (piece: Element, i: number) => void): void {
         $on(piece, 'click', () => handler(piece, i));
     }
 
-    bindUndoMove(handler) {
+    bindUndoMove(handler: Function): void {
         // $on(this.$undobtn, 'click', () => handler());
     }
 
-    bindRedoMove(handler) {
+    bindRedoMove(handler: Function): void {
         // $on(this.$redobtn, 'click', () => handler());
     }
 }

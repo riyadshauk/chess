@@ -3,7 +3,7 @@
         "module": "es6",
         "target": "es6",
         "allowJs": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "sourceMap": true

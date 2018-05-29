@@ -1,7 +1,6 @@
-import { initialGameState, GameState } from './gamestate';
+import { Box, Piece, EmptyPiece, GameState } from '../types';
 import Rook from './rook';
 import { PieceGameLogic } from './piecegamelogic';
-import { Piece, Box } from './piece';
 import { expect } from 'chai';
 import 'mocha';
 
@@ -16,8 +15,7 @@ describe('rook test cases', () => {
 });
 
 const testRookCanForwardWithNoObstruction = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -26,17 +24,17 @@ const testRookCanForwardWithNoObstruction = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:4,c:0};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(true);
 };
 
 const testRookCannotGoForwardWithObstruction = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -45,17 +43,17 @@ const testRookCannotGoForwardWithObstruction = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:4,c:0};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(false);
 };
 
 const testRookCanGoHorizontalWithoutObstruction = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -64,17 +62,17 @@ const testRookCanGoHorizontalWithoutObstruction = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0',' ',' ','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:7,c:2};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(true);
 };
 
 const testRookCannotGoHorizontalWithObstruction = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -83,17 +81,17 @@ const testRookCannotGoHorizontalWithObstruction = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     ['P0','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0',' ',' ','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:7,c:3};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(false);
 };
 
 const testRookCanGoForwardAndCaptureEnemyPiece = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -102,17 +100,17 @@ const testRookCanGoForwardAndCaptureEnemyPiece = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:1,c:0};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(true);
 };
 
 const testRookCannotGoForwardThrough2EnemyPieces = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     ['r0','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -121,17 +119,17 @@ const testRookCannotGoForwardThrough2EnemyPieces = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:0,c:0};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(false);
 };
 
 const testRookCannotGoForwardThrough1EnemyPiece = () => {
-  const gameState = initialGameState();
-  gameState.board = [
+  const board = [
     [' ','h0','b0','q0','k0','b0','h0','r0'], // lower case: black pieces
     ['p0','p0','p0','p0','p0','p0','p0','p0'],
     [' ',' ',' ',' ',' ',' ',' ',' '],
@@ -140,9 +138,10 @@ const testRookCannotGoForwardThrough1EnemyPiece = () => {
     [' ',' ',' ',' ',' ',' ',' ',' '],
     [' ','P0','P0','P0','P0','P0','P0','P0'], // upper case: white pieces
     ['R0','H0','B0','Q0','K0','B0','H0','R0'] ];
-   const src = {r:7,c:0};
+  const gameState = new GameState(board);
+  const src = {r:7,c:0};
   const dst = {r:0,c:0};
-  const Rook = PieceGameLogic.getType(gameState.board[src.r][src.c]);
+  const Rook = PieceGameLogic.getType(gameState.getEncoding(src));
   const isPossibconstoMoveTo = Rook.getPossibleMoves(gameState,src,0);
   const possible = isPossibconstoMoveTo(dst);
   expect(possible).to.equal(false);

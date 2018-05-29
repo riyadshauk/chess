@@ -1,6 +1,19 @@
-import Store from '../store';
+import Store from '../store/store';
 import View from '../view/view';
-import {Board, Box, emptyBox, Piece, initializePiece, Location} from '../types';
+import { Board, Box, Piece, EmptyPiece, StoreState, PLAYER_WHITE, PLAYER_BLACK } from '../types';
+import { PieceGameLogic } from '../model/piecegamelogic';
+
+/**
+ * Note that the Controller is the only module which shall know about any and all of the Model, Store, and View.
+ * The Controller shall simply relay user events from the View to the Model, taking the purely functional
+ * output from the Model and storing it in the Store. The Controller then notifies the View of the updated
+ * state (via this.store.state, no more, no less), and the View updates. The loop continues as such.
+ * 
+ * This is a simple paradigm once thought out. The Controller shall be as simple as possible, delegating
+ * as much of the game logic as possible to the Model, and as much as the graphical appearance as possible
+ * to the View, while storing the updates to the relevant state of the game (as needed by the View) in 
+ * the Store (which contains virtually no logic, acting much like a simple NoSQL document).
+ */
 
 /**
  * Deserialize the HTML data into a JS object.
@@ -8,57 +21,42 @@ import {Board, Box, emptyBox, Piece, initializePiece, Location} from '../types';
  * @param {Element} box The raw html box from the view
  * @returns {Box} the contents of the box as a structured JS object
  */
-const deserializeBoxContents = (box: Element): Box => {
-    let ret = emptyBox(Number(box.getAttribute('data-pos')));
-    if (box.querySelector('div')) {
-        ret.piece = initializePiece(box.querySelector('div').getAttribute('class'));
-    }
-    return ret;
+const deserializeBoxContents = (boxElem: Element): { box: Box, piece: Piece } => {
+    let boxPos = Number(boxElem.getAttribute('data-pos'));
+    const r = Math.floor(boxPos / 8);
+    const c = boxPos % 8;
+    const box: Box = { r, c };
+    const piece = <Piece>JSON.parse(boxElem.getAttribute('piece'));
+    return { box, piece };
 }
 
-const deserializeCapturedPiece = (pieceElem) => initializePiece(pieceElem.firstChild.getAttribute('class'));
-
-/**
- * @param {Box} box
- * @returns {Location} location of box on board
- */
-const extractLocationFromBox = (box: Box): Location => {
-    return {r: box.r, c: box.c}
-}
+const deserializeCapturedPiece = (pieceElem: Element): Piece => PieceGameLogic.getType(pieceElem.querySelector('div').getAttribute('class').replace('white', '').replace('black', ''));
 
 export default class Controller {
     private store: Store;
     private view: View;
-    private _selectedBox: Box;
-    private _lastSelectedBox: Box;
+    private _selectedBox: { box: Box, piece: Piece };
+    private _lastSelectedBox: { box: Box, piece: Piece };
     private _selectedCapturedPiece: Piece;
-    /**
-     * @param {!Store} store A store instance
-     * @param {!View} view a View instance
-     */
-    constructor(store: Store, view: View) {
-        /**
-         * @type {!Store}
-         */
-        this.store = store;
-        /**
-         * @type {!View}
-         */
-        this.view = view;
-        /**
-         * @type {!Box}
-         */
-        this._selectedBox = emptyBox(-1);
-        /**
-         * @type {!Box}
-         */
-        this._lastSelectedBox = emptyBox(-1);
-        /**
-         * @type {!Piece}
-         */
-        this._selectedCapturedPiece = initializePiece(null);
-        this.view.bindUndoMove(this.undoMove.bind(this));
-        this.view.bindRedoMove(this.redoMove.bind(this));
+    private createAndShowInitialBoard() {
+        const newState: StoreState = new StoreState;
+        newState.board = PieceGameLogic.convertGSBoardToPieceBoard(newState.gameState);
+        this.store.state = newState;
+        this.showBoardAndBindBoxes();
+    }
+    public setStoreState(newState: StoreState): void {
+      newState.board = PieceGameLogic.convertGSBoardToPieceBoard(newState.gameState);
+      this.store.state = newState;
+    }
+    constructor() {
+        this.store = new Store;
+        this.view = new View;
+        this._selectedBox = { box: { r: -1, c: -1 }, piece: new EmptyPiece };
+        this._lastSelectedBox = { box: { r: -1, c: -1 }, piece: new EmptyPiece };
+        this._selectedCapturedPiece = new EmptyPiece;
+        this.createAndShowInitialBoard();
+        // this.view.bindUndoMove(this.undoMove.bind(this));
+        // this.view.bindRedoMove(this.redoMove.bind(this));
     }
 
     /**
@@ -66,12 +64,11 @@ export default class Controller {
      * @param {Void}
      * @returns {Void}
      */
-    showBoardAndBindBoxes() {
-        let board = this.store.getLocalStorage().liveBoard;
-        this.view.showBoard(board);
+    showBoardAndBindBoxes(): void {
+        this.view.showBoard(this.store.state);
         for (let r = 0; r < 8; r++) {
             for (let c = 0; c < 8; c++) {
-                let box = this.view.get$board().children[0].children[r].children[c];
+                let box = this.view.$board.children[0].children[r].children[c];
                 this.view.bindSelectBox(box, this.selectBox.bind(this));
             }
         }
@@ -82,84 +79,67 @@ export default class Controller {
      * @param {Void}
      * @returns {Void}
      */
-    showAndBindCapturedPieces() {
-        let captures = this.store.getLocalStorage().liveCaptures;
-        this.view.showCaptures(captures);
+    showAndBindCapturedPieces(): void {
+        let captures = this.store.state.captures;
+        this.view.showCaptures(this.store.state);
         let whiteIdx = 0;
         let blackIdx = 0;
         for (let i = 0; i < captures.length; i++) {
-            if (captures[i].title && captures[i].title.indexOf('black') == 0) {
-                let piece = this.view.get$capturedblack().children[0].children[blackIdx++];
+            if (captures[i].color && captures[i].color.indexOf('black') == 0) {
+                let piece = this.view.$capturedblack.children[0].children[blackIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
-            else if (captures[i].title && captures[i].title.indexOf('white') == 0) {
-                let piece = this.view.get$capturedwhite().children[0].children[whiteIdx++];
+            else if (captures[i].color && captures[i].color.indexOf('white') == 0) {
+                let piece = this.view.$capturedwhite.children[0].children[whiteIdx++];
                 if (piece != undefined) this.view.bindCapturedPiece(piece, i, this.selectCapturedPiece.bind(this));
             }
         }
     }
 
     /**
+     * @description Notifies PGL based on new state of this._selectedBox and this._lastSelectedBox.
+     * @helper This is extracted functionality from Controller.selectBox.
+     */
+    moveXorGetPossibleMoves(): void {
+      if (!(this._lastSelectedBox.piece instanceof EmptyPiece)) {
+        const updatedMoveState = PieceGameLogic.makeLegalMove(this.store.state.gameState, this._lastSelectedBox.box, this._selectedBox.box, this.store.state.prevMove);
+        const newState = new StoreState;
+        newState.prevMove = this.store.state.prevMove;
+        newState.gameState = updatedMoveState.gameState;
+        const capturedPiece = updatedMoveState.capturedPiece;
+        if (this.store.state.gameState !== newState.gameState) {
+          newState.prevMove = { src: this._lastSelectedBox.box, dst: this._selectedBox.box };
+          newState.gameState.player = this.store.state.gameState.player === PLAYER_WHITE ? PLAYER_BLACK : PLAYER_WHITE;
+          if (!(capturedPiece instanceof EmptyPiece)) {
+            newState.captures.push(capturedPiece);
+          }
+        } else {
+          const possibleMoves = PieceGameLogic.getPossibleMoves(this.store.state.gameState, this._selectedBox.box, this.store.state.prevMove);
+          newState.possibleDestBoxes = this.store.state.initializeFalseGrid(8);
+          possibleMoves.forEach((box: Box) => {
+            newState.possibleDestBoxes[box.r][box.c] = true;
+          });
+        }
+        this.setStoreState(newState);
+      } 
+    }
+
+    /**
      * Update selectedPiece after seting lastSelectedPiece to current selectedPiece.
      * 
      * @param {!Element} box div of the selected box
-     * @todo Stop trying to be cute. Move a lot of this logic to the model.
-     *   This function should be simple/concise and easy to understand, at a glance.
      */
-    selectBox(box: Element) {
-        this._lastSelectedBox = this._selectedBox;
-        this._selectedBox = deserializeBoxContents(box);
-        this.store.selectBox(this._selectedBox.pos);
-        if (this._lastSelectedBox.pos == this._selectedBox.pos) {
-            return;
-        }
-        let locationIfCanMove = undefined;
-        if (this._lastSelectedBox.piece != null) locationIfCanMove = this.store.locationIfCanMove(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
-        if (this._lastSelectedBox.piece != null && locationIfCanMove != false) {
-            this.store.movePiece(extractLocationFromBox(this._lastSelectedBox), extractLocationFromBox(this._selectedBox));
-            this.store.unselectBox(this._lastSelectedBox.pos);
-            this.store.updatePossibleMoves(null);
-            this._lastSelectedBox = emptyBox(-1);
-            if (this.store.canPromote({r: this._selectedBox.r, c: this._selectedBox.c})) {
-                alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
-            }
-            this.store.unselectBox(this._selectedBox.pos);
-            this._selectedBox = emptyBox(-1);
-        }
-        else if ((this._lastSelectedBox.piece != null && this._lastSelectedBox.piece.title != null
-                && this._selectedBox.piece != null && this._selectedBox.piece.title != null
-                && (this.store.promoteIfPossible({r: this._lastSelectedBox.r, c: this._lastSelectedBox.c}, {r: this._selectedBox.r, c: this._selectedBox.c})) 
-                    || ((this._selectedCapturedPiece != null && this._selectedCapturedPiece.title != null
-                        && this._lastSelectedBox.piece != null && this._lastSelectedBox.piece.title != null
-                        && this.store.promoteIfPossible({r: this._lastSelectedBox.r, c: this._lastSelectedBox.c}, undefined, this._selectedCapturedPiece)))
-                )) {
-                    if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
-                    if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-                    this.store.updatePossibleMoves(null);
-                    this._lastSelectedBox = emptyBox(-1);
-                    this._selectedBox = emptyBox(-1);
-        }
-        else if (this._selectedBox.piece != null) {
-            this.store.updatePossibleMoves(null);
-            const possibleMoves = this.store.getPossibleMoves(extractLocationFromBox(this._selectedBox));
-            this.store.updatePossibleMoves(possibleMoves);
-            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-            this._lastSelectedBox = emptyBox(-1);
-        } else {
-            this.store.updatePossibleMoves(null);
-            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-            this._lastSelectedBox = emptyBox(-1);
-            if (this.store.canPromote({r: this._selectedBox.r, c: this._selectedBox.c})) {
-                // alert('Promotion possible: Select the promotable pawn, then any piece of the same color as the promotable pawn to complete the promotion.');
-            }
-            if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
-            this._selectedBox = emptyBox(-1);
-        }
-        if (this._selectedCapturedPiece.capturedIdx != -1) {
-            this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
-        }
-        this.showAndBindCapturedPieces();
-        this.showBoardAndBindBoxes();
+    selectBox(box: Element): void {
+      this._lastSelectedBox = this._selectedBox;
+      this._selectedBox = deserializeBoxContents(box);
+
+      this.showAndBindCapturedPieces();
+      this.showBoardAndBindBoxes();
+
+      this.moveXorGetPossibleMoves();
+
+      this.showAndBindCapturedPieces();
+      this.showBoardAndBindBoxes();
     }
 
     /**
@@ -167,51 +147,34 @@ export default class Controller {
      * @param {Element} pieceElem
      * @param {number} i Index of captured piece.
      */
-    selectCapturedPiece(pieceElem: Element, i: number) {
-        if (this._selectedCapturedPiece.capturedIdx != -1) {
-            this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
-        }
-        if (this._lastSelectedBox.piece != null || this._selectedBox.piece != null) {
-            this.store.updatePossibleMoves(null);
-            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-            if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
-            this._lastSelectedBox = emptyBox(-1);
-            this._lastSelectedBox = emptyBox(-1);
-        }
-        this._selectedCapturedPiece = deserializeCapturedPiece(pieceElem);
-        this._selectedCapturedPiece.capturedIdx = i;
-        this.store.selectCapturedPiece(i);
+    selectCapturedPiece(pieceElem: Element, i: number): void {
+
+        /**
+         * @todo
+         */
+
         this.showAndBindCapturedPieces();
         this.showBoardAndBindBoxes();
     }
 
-    undoMove() {
-        const liveStore = this.store.getLocalStorage();
-        if (liveStore.liveHistory.length == 0) return;
-        this.store.updatePossibleMoves(null);
-        if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-        if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
-        if (this._selectedCapturedPiece.capturedIdx != -1) this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
-        this._selectedBox = emptyBox(-1);
-        this._lastSelectedBox = emptyBox(-1);
-        this._selectedCapturedPiece = initializePiece(null);
-        this.store.undoMove();
-        this.showAndBindCapturedPieces();
-        this.showBoardAndBindBoxes();
+    /**
+     * @todo Look into FEN, PGN, SAN and common implementations of keeping history
+     */
+    undoMove(): void {
+
     }
 
-    redoMove() {
-        const liveStore = this.store.getLocalStorage();
-        if (liveStore.liveRedoHistory.length == 0) return;
-        this.store.updatePossibleMoves(null);
-        if (this._lastSelectedBox.pos != -1) this.store.unselectBox(this._lastSelectedBox.pos);
-        if (this._selectedBox.pos != -1) this.store.unselectBox(this._selectedBox.pos);
-        if (this._selectedCapturedPiece.capturedIdx != -1) this.store.unSelectCapturedPiece(this._selectedCapturedPiece.capturedIdx);
-        this._selectedBox = emptyBox(-1);
-        this._lastSelectedBox = emptyBox(-1);
-        this._selectedCapturedPiece = initializePiece(null);
-        this.store.redoMove();
-        this.showAndBindCapturedPieces();
-        this.showBoardAndBindBoxes();
+    redoMove(): void {
+
+    }
+
+    /**
+     * @todo Consider FEN, PGN, SAN, etc for this.
+     */
+    loadBoard(): void {
+
+    }
+    saveBoard(): void {
+
     }
 }

@@ -1,21 +1,21 @@
-import {Piece, Box} from './piece';
-import {PieceHelper} from './piecehelper';
+import { Box, Piece, GameState, PLAYER_WHITE } from '../types';
+import { PieceHelper } from './piecehelper';
 
 export default class Pawn implements Piece {
   public name: string;
   public color: string;
-  public getPossibleMoves;
+  public getPossibleMoves: (gameState: GameState, src: Box, numMoves?: number) => (dst: Box) => boolean;
   constructor(color: string) {
     this.name = 'pawn';
     this.color = color;
-    this.getPossibleMoves = (gameState,src: Box,numMoves?: number) => {
+    this.getPossibleMoves = (gameState: GameState, src: Box,numMoves?: number): (dst: Box) => boolean => {
       if (numMoves === undefined) numMoves = PieceHelper.getNumMoves(gameState,src);
-      const forwardDirectionOfCurrentPlayer = () => gameState.player == gameState.playerWhite ? -1 : 1;
+      const forwardDirectionOfCurrentPlayer = () => gameState.player == PLAYER_WHITE ? -1 : 1;
       /**
        * @param {!Box} dst 
        * @yields {boolean} Returns a (curried) function that returns a boolean (when applied).
        */
-      const isPossibleToMoveTo = dst => {
+      const isPossibleToMoveTo = (dst: Box): boolean => {
         if (!PieceHelper.isValidSourceAndDest(gameState,src,dst)) return false;
         const dir = forwardDirectionOfCurrentPlayer();
         const pawnCanMove1Forward = PieceHelper.isEmpty(gameState,dst) && src.c == dst.c && dst.r == src.r + dir;

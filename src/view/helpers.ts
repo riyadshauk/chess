@@ -2,24 +2,16 @@
 // respect: https://github.com/tastejs/todomvc/tree/gh-pages/examples/vanilla-es6
 
 /**
- * querySelector wrapper
- * 
- * @param {string} selector
- * @param {Element} [scope]
+ * @description querySelector wrapper
  */
 export function qs(selector: string, scope?: Element) {
     return (scope || document).querySelector(selector);
 }
 
 /**
- * addEventListener wrapper
- * 
- * @param {Element|Window} target Target Element
- * @param {string} type Event name to bind to
- * @param {Function} callback Event callback
- * @param {boolean} [capture] Capture the event
+ * @description addEventListener wrapper
  */
-export function $on(target: Element | Window, type: string, callback: EventListenerOrEventListenerObject, capture?: boolean | AddEventListenerOptions) { // @todo fix callback type
+export function $on(target: Element | Window, type: string, callback: EventListenerOrEventListenerObject, capture?: boolean | AddEventListenerOptions): void { // @todo fix callback type
     target.addEventListener(type, callback, !!capture);
 }
 
@@ -31,10 +23,8 @@ export function $on(target: Element | Window, type: string, callback: EventListe
 // ....
 
 /**
- * Encode less-than and ampersand characters with HTML-safe versions.
- * 
+ * @description Encode less-than and ampersand characters with HTML-safe versions.
  * @param {string} s String to escape
- * 
  * @returns {string} String with unsafe characters escaped.
  */
 export const escapeForHTML = (s: string): string => s.replace(/[&<]/g, c => c === '&' ? '&amp;' : '&lt;');

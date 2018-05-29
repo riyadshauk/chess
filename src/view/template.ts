@@ -1,4 +1,4 @@
-import { Board, emptyBox, Piece } from '../types';
+import { Board, Piece, StoreState } from '../types';
 
 import { escapeForHTML } from './helpers';
 
@@ -7,11 +7,9 @@ export default class Template {
      * Format the content of the board by:
      * 1) Creating each box in a table representation;
      * 2) Placing each piece in its corresponding box.
-     * 
-     * @param {Board} boxes Array containing boxes
-     * @returns {!Element} Contents of the board (as a table)
      */
-    Board(boxes: Board): Element {
+    Board(state: StoreState): Element {
+        const pieces: Array<Array<Piece>> = state.board;
         let board = document.createElement('board');
         let boxPos = 0;
         for (let r = 0; r < 8; r++) {
@@ -19,17 +17,17 @@ export default class Template {
             for (let c = 0; c < 8; c++) {
                 let td = document.createElement('td');
                 td.setAttribute('data-pos', String(boxPos));
-                const box = boxes[r*8+c];
-                const piece = box.piece;
+                const piece = pieces[r][c];
+                td.setAttribute('piece', JSON.stringify(piece));
                 if (piece) {
                     let pieceDiv = document.createElement('div');
-                    pieceDiv.setAttribute('class', piece.title);
+                    pieceDiv.setAttribute('class', piece.color + piece.name);
                     td.appendChild(pieceDiv);
                 }
-                if (box.selected) {
+                if (state.selectedBoxes[r][c]) {
                     td.setAttribute('class', 'selected');
                 }
-                if (box.possibleDest) {
+                if (state.possibleDestBoxes[r][c]) {
                     td.setAttribute('class', 'possibleDest');
                 }
                 tr.appendChild(td);
@@ -39,21 +37,18 @@ export default class Template {
         }
         return board;
     }
-    /**
-     * @param {!string} type 
-     * @param {!Array<Piece>} captures 
-     * @returns {Element}
-     */
-    Captured(type: string, captures: Array<Piece>): Element {
+    Captured(type: string, state: StoreState): Element {
+        const captures = state.captures;
+        const selectedCaptures = state.selectedCaptures;
         let tr = document.createElement('tr');
         for (let i = 0; i < captures.length; i++) {
             const piece = captures[i];
-            if (piece.title && piece.title.indexOf(type) == 0) {
+            if (piece.name && piece.name.indexOf(type) == 0) {
                 let td = document.createElement('td');
                 let pieceDiv = document.createElement('div');
-                pieceDiv.setAttribute('class', piece.title);
-                if (piece.selectedCapture) {
-                    pieceDiv.setAttribute('class', piece.title + ' selectedCapture');
+                pieceDiv.setAttribute('class', piece.color + piece.name);
+                if (selectedCaptures[i]) {
+                    pieceDiv.setAttribute('class', piece.color + piece.name + ' selectedCapture');
                 }
                 td.appendChild(pieceDiv);
                 tr.appendChild(td);
@@ -61,18 +56,10 @@ export default class Template {
         }
         return tr;
     }
-    /**
-     * @param {!Board} boxes
-     * @returns {Element} 
-     */
-    CapturedWhite(boxes: Array<Piece>): Element {
-        return this.Captured('white', boxes);
+    CapturedWhite(state: StoreState): Element {
+        return this.Captured('white', state);
     }
-    /**
-     * @param {!Board} boxes 
-     * @returns {Element}
-     */
-    CapturedBlack(boxes: Array<Piece>): Element {
-        return this.Captured('black', boxes);
+    CapturedBlack(state: StoreState): Element {
+        return this.Captured('black', state);
     }
 }
