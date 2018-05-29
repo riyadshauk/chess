@@ -25,7 +25,7 @@ export default class Pawn implements Piece {
         };
         const pawnCanMove2Forward = numMoves == 0 && PieceHelper.isEmpty(gameState,dst) && PieceHelper.isEmpty(gameState,inBetweenSquare) && src.c == dst.c && dst.r == src.r +2*dir;
         const pawnCanAttack = !PieceHelper.isPieceOfCurrentPlayer(gameState,dst) && !PieceHelper.isEmpty(gameState,dst) && dst.r == src.r + dir && (dst.c == src.c + 1 || dst.c == src.c - 1);
-        return pawnCanMove1Forward || pawnCanMove2Forward || pawnCanAttack;
+        return (pawnCanMove1Forward || pawnCanMove2Forward || pawnCanAttack) && !PieceHelper.isPieceOfCurrentPlayer(gameState, dst);
       }
       return isPossibleToMoveTo;
     };

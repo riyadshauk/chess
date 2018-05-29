@@ -30,7 +30,7 @@ const PieceGameLogic = { // for TypeScript
   getBoxOfPromotablePieceIfPossible: (gameState: GameState): Box => ({r: -1, c: -1}),
   promoteIfPossible: (gameState: GameState, first: Box, second: Piece): GameState => gameState,
   incrementMoveCount: (enc: string): string => '',
-  makeLegalMove: (gameState: GameState, src: Box, dst: Box, prevMove: {src: Box, dst: Box}, pieceToPromoteTo?: Piece): { gameState: GameState, capturedPiece: Piece } => ({ gameState, capturedPiece: <Piece>(new EmptyPiece) }),
+  makeLegalMove: (gameState: GameState, src: Box, dst: Box, prevMove: {src: Box, dst: Box}, pieceToPromoteTo?: Piece): { gameState: GameState, capturedPiece: Piece, wasPromotion: boolean } => ({ gameState, capturedPiece: <Piece>(new EmptyPiece), wasPromotion: false }),
 };
 PieceGameLogic.convertGSBoardToPieceBoard = (gameState: GameState): Array<Array<Piece>> => {
   const pieceBoard = [];
@@ -266,8 +266,11 @@ PieceGameLogic.isACapture = (gameState: GameState, src: Box, dst: Box): boolean 
  */
 PieceGameLogic.isEnPassantPossible = (gameState: GameState, src: Box, prevMove: {src: Box, dst: Box}): boolean => {
   const opponentStart = prevMove.dst.r - prevMove.src.r > 0 ? 1 : 6;
-  if (PieceGameLogic.getType(gameState.getEncoding(src)) instanceof Pawn
+  const dir = prevMove.dst.r - prevMove.src.r > 0 ? 1 : -1;
+  const piece = PieceGameLogic.getType(gameState.getEncoding(src));
+  if (piece instanceof Pawn
       && Math.abs(prevMove.dst.r - prevMove.src.r) === 2
+      && prevMove.dst.r === src.r
       && opponentStart === prevMove.src.r /* shouldn't happen under normal Pawn rules */
       && PieceGameLogic.getType(gameState.getEncoding(prevMove.dst)) instanceof Pawn
       && !PieceHelper.isPieceOfCurrentPlayer(gameState, prevMove.dst)) {
@@ -304,24 +307,24 @@ PieceGameLogic.incrementMoveCount = (enc: string): string => {
 /**
  * @description Attempt to make the desired move, if the move is legal.
  */
-PieceGameLogic.makeLegalMove = (gameState: GameState, src: Box, dst: Box, prevMove: {src: Box, dst: Box}, pieceToPromoteTo?: Piece): { gameState: GameState, capturedPiece: Piece } => {
+PieceGameLogic.makeLegalMove = (gameState: GameState, src: Box, dst: Box, prevMove: {src: Box, dst: Box}, pieceToPromoteTo?: Piece): { gameState: GameState, capturedPiece: Piece, wasPromotion: boolean } => {
   const promotableBox = PieceGameLogic.getBoxOfPromotablePieceIfPossible(gameState);
   if (promotableBox !== undefined) {
     if (pieceToPromoteTo === undefined) {
       pieceToPromoteTo = PieceGameLogic.getType(gameState.getEncoding(dst));
     }
-    return { gameState: PieceGameLogic.promoteIfPossible(gameState, src, pieceToPromoteTo), capturedPiece: new EmptyPiece };
+    return { gameState: PieceGameLogic.promoteIfPossible(gameState, src, pieceToPromoteTo), capturedPiece: new EmptyPiece, wasPromotion: true };
   }
   if (PieceGameLogic.kingCanCastleWithGivenRook(gameState, src, dst)) {
-    return { gameState: PieceGameLogic.castleKingWithGivenRook(gameState, src, dst), capturedPiece: new EmptyPiece };
+    return { gameState: PieceGameLogic.castleKingWithGivenRook(gameState, src, dst), capturedPiece: new EmptyPiece, wasPromotion: false };
   }
-  const moveAndUpdateState = (enPassant?: Box): { gameState: GameState, capturedPiece: Piece } => {
+  const moveAndUpdateState = (enPassant?: Box): { gameState: GameState, capturedPiece: Piece, wasPromotion: boolean } => {
     const capturedPiece = enPassant ? PieceGameLogic.getType(gameState.getEncoding(enPassant)) : PieceGameLogic.getType(gameState.getEncoding(dst));
     const newBoard = new Board(gameState.board);
     if (enPassant) newBoard.setEncoding(enPassant, ' ');
     newBoard.setEncoding(dst, PieceGameLogic.incrementMoveCount(gameState.getEncoding(src)));
     newBoard.setEncoding(src, ' ');
-    return { gameState: new GameState(newBoard), capturedPiece };
+    return { gameState: new GameState(newBoard), capturedPiece, wasPromotion: false };
   };
   if (PieceGameLogic.isEnPassantPossible(gameState, src, prevMove)) {
     const dir = prevMove.dst.r - prevMove.src.r > 0 ? -1 : 1;
@@ -333,8 +336,11 @@ PieceGameLogic.makeLegalMove = (gameState: GameState, src: Box, dst: Box, prevMo
   const possibleMoves = PieceGameLogic.getPossibleMoves(gameState, src, prevMove);
   for (let i = 0; i < possibleMoves.length; i++) {
     const box: Box = possibleMoves[i];
-    if (dst.r === box.r && dst.c === box.c) return moveAndUpdateState();
+    if (dst.r === box.r && dst.c === box.c
+        && !PieceHelper.isPieceOfCurrentPlayer(gameState, dst)) {
+          return moveAndUpdateState();
+        }
   }
-  return { gameState, capturedPiece: new EmptyPiece };
+  return { gameState, capturedPiece: new EmptyPiece, wasPromotion: false };
 };
 export { PieceGameLogic };

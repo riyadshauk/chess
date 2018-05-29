@@ -102,14 +102,15 @@ export default class Controller {
      */
     moveXorGetPossibleMoves(): void {
       if (!(this._lastSelectedBox.piece instanceof EmptyPiece)) {
-        const updatedMoveState = PieceGameLogic.makeLegalMove(this.store.state.gameState, this._lastSelectedBox.box, this._selectedBox.box, this.store.state.prevMove);
-        const newState = new StoreState;
-        newState.prevMove = this.store.state.prevMove;
+        const updatedMoveState = PieceGameLogic.makeLegalMove(this.store.state.gameState, this._lastSelectedBox.box, this._selectedBox.box, this.store.state.prevMove, this._selectedCapturedPiece);
+        const newState = new StoreState(this.store.state);
         newState.gameState = updatedMoveState.gameState;
         const capturedPiece = updatedMoveState.capturedPiece;
         if (this.store.state.gameState !== newState.gameState) {
+          newState.possibleDestBoxes = this.store.state.initializeFalseGrid(8);
           newState.prevMove = { src: this._lastSelectedBox.box, dst: this._selectedBox.box };
           newState.gameState.player = this.store.state.gameState.player === PLAYER_WHITE ? PLAYER_BLACK : PLAYER_WHITE;
+          if (updatedMoveState.wasPromotion) newState.gameState.player = newState.gameState.player === PLAYER_WHITE ? PLAYER_BLACK : PLAYER_WHITE;
           if (!(capturedPiece instanceof EmptyPiece)) {
             newState.captures.push(capturedPiece);
           }
@@ -121,7 +122,8 @@ export default class Controller {
           });
         }
         this.setStoreState(newState);
-      } 
+      }
+      this._selectedCapturedPiece = undefined;
     }
 
     /**
@@ -148,11 +150,7 @@ export default class Controller {
      * @param {number} i Index of captured piece.
      */
     selectCapturedPiece(pieceElem: Element, i: number): void {
-
-        /**
-         * @todo
-         */
-
+        this._selectedCapturedPiece = this.store.state.captures[i];
         this.showAndBindCapturedPieces();
         this.showBoardAndBindBoxes();
     }

@@ -43,7 +43,7 @@ export default class Template {
         let tr = document.createElement('tr');
         for (let i = 0; i < captures.length; i++) {
             const piece = captures[i];
-            if (piece.name && piece.name.indexOf(type) == 0) {
+            if (piece.color && piece.color.indexOf(type) == 0) {
                 let td = document.createElement('td');
                 let pieceDiv = document.createElement('div');
                 pieceDiv.setAttribute('class', piece.color + piece.name);
@@ -55,6 +55,7 @@ export default class Template {
             }
         }
         return tr;
+
     }
     CapturedWhite(state: StoreState): Element {
         return this.Captured('white', state);

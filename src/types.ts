@@ -141,14 +141,14 @@ export class StoreState {
   public initializeFalseGrid(d: number): Array<Array<boolean>> {
     return this.array2d(d, false);
   }
-  constructor() {
-    this.gameState = new GameState;
-    this.selectedBoxes = this.initializeFalseGrid(8);
-    this.possibleDestBoxes = this.initializeFalseGrid(8);
-    this.prevMove = { src: { r: -1, c: -1 }, dst: { r: -1, c: -1 }};
-    this.captures = [];
-    this.selectedCaptures = [];
-    this.board = [];
+  constructor(state?: StoreState) {
+    this.gameState = state ? state.gameState : new GameState;
+    this.selectedBoxes = state ? state.selectedBoxes : this.initializeFalseGrid(8);
+    this.possibleDestBoxes = state ? state.possibleDestBoxes : this.initializeFalseGrid(8);
+    this.prevMove = state ? state.prevMove : { src: { r: -1, c: -1 }, dst: { r: -1, c: -1 }};
+    this.captures = state ? state.captures : [];
+    this.selectedCaptures = state ? state.selectedCaptures : [];
+    this.board = state ? state.board : [];
   }
 }
 
