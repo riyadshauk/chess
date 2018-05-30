@@ -1,0 +1,8 @@
+{
+  "runtime":{
+    "majorVersion":"6"
+  },
+  "command": "node server.js",
+  "release": {},
+  "notes": "JS Chess Game (host bundled, static JS chess app)"
+}
