@@ -1,5 +1,7 @@
 # chess
-Though I made this game for fun, I was able to include [an online demo here](http://web.engr.illinois.edu/~shauk2/), from my alma mater's domain (working while I still have access to the domain : )  
+Though I made this game for fun, I was able to include [an online demo here](http://web.engr.illinois.edu/~shauk2/), from my alma mater's domain (working while I still have access to the domain : )
+
+Updated Demo: I also have a [Heroku app, here](https://chess-riyad.herokuapp.com/), that automatically pulls and deploys the latest version of the chess game on this repository.
 
 This is a chess game written in ES6 TypeScript, HTML 5, CSS (no fancy/modular Flexbox, CSS Grid Layout, or media queries in this simple game... maybe down the road), and bundled with the Webpack (4.10.0 / latest as of now). The View is modeled after [the vanilla ES6 TodoMVC example](http://todomvc.com/examples/vanilla-es6/).
 ![Chessplay GIF](chessplay.gif)  
