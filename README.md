@@ -1,5 +1,6 @@
 # chess
 [![Build Status](https://travis-ci.org/riyadshauk/chess.svg?branch=master)](https://travis-ci.org/riyadshauk/chess)
+
 Though I made this game for fun, I was able to include [an online demo here](http://web.engr.illinois.edu/~shauk2/), from my alma mater's domain (working while I still have access to the domain : )
 
 Updated Demo: I also have a [Heroku app, here](https://chess-riyad.herokuapp.com/), that automatically pulls and deploys the latest version of the chess game on this repository.
